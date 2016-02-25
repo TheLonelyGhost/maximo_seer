@@ -1,7 +1,7 @@
 var AjaxManager = function() {
   var self = this;
   this.xhr = new XMLHttpRequest();
-  if(!("withCredentials" in xhr))
+  if(!("withCredentials" in this.xhr))
     throw "CORS is not supported in this browser. Please use an up-to-date browser, such as Chrome: https://www.google.com/chrome/desktop/index.html";
 
   this.xhr.onreadystatechange = function() {
