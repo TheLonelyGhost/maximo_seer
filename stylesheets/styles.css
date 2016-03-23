@@ -421,3 +421,11 @@ footer {
     color:#444;
   }
 }
+
+span[data-inventory-id]:hover {
+  cursor: pointer;
+}
+
+[data-inventory-id].current {
+  font-weight: bold;
+}
