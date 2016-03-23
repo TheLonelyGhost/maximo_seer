@@ -1,4 +1,1539 @@
-!function(t){"use strict";t.console=t.console||{};for(var e,n,o=t.console,r={},a=function(){},s=["memory"],i=["assert","clear","count","debug","dir","dirxml","error","exception","group","groupCollapsed","groupEnd","info","log","markTimeline","profile","profiles","profileEnd","show","table","time","timeEnd","timeline","timelineEnd","timeStamp","trace","warn"];e=s.pop();)o[e]||(o[e]=r);for(;n=i.pop();)"function"!=typeof o[n]&&(o[n]=a)}("undefined"==typeof window?this:window),!function(t){function e(t,e){return function(){t.apply(e,arguments)}}function n(t){if("object"!=typeof this)throw new TypeError("Promises must be constructed via new");if("function"!=typeof t)throw new TypeError("not a function");this._state=null,this._value=null,this._deferreds=[],u(t,e(r,this),e(a,this))}function o(t){var e=this;return null===this._state?void this._deferreds.push(t):void d(function(){var n=e._state?t.onFulfilled:t.onRejected;if(null===n)return void(e._state?t.resolve:t.reject)(e._value);var o;try{o=n(e._value)}catch(r){return void t.reject(r)}t.resolve(o)})}function r(t){try{if(t===this)throw new TypeError("A promise cannot be resolved with itself.");if(t&&("object"==typeof t||"function"==typeof t)){var n=t.then;if("function"==typeof n)return void u(e(n,t),e(r,this),e(a,this))}this._state=!0,this._value=t,s.call(this)}catch(o){a.call(this,o)}}function a(t){this._state=!1,this._value=t,s.call(this)}function s(){for(var t=0,e=this._deferreds.length;e>t;t++)o.call(this,this._deferreds[t]);this._deferreds=null}function i(t,e,n,o){this.onFulfilled="function"==typeof t?t:null,this.onRejected="function"==typeof e?e:null,this.resolve=n,this.reject=o}function u(t,e,n){var o=!1;try{t(function(t){o||(o=!0,e(t))},function(t){o||(o=!0,n(t))})}catch(r){if(o)return;o=!0,n(r)}}var c=setTimeout,d="function"==typeof setImmediate&&setImmediate||function(t){c(t,1)},l=Array.isArray||function(t){return"[object Array]"===Object.prototype.toString.call(t)};n.prototype["catch"]=function(t){return this.then(null,t)},n.prototype.then=function(t,e){var r=this;return new n(function(n,a){o.call(r,new i(t,e,n,a))})},n.all=function(){var t=Array.prototype.slice.call(1===arguments.length&&l(arguments[0])?arguments[0]:arguments);return new n(function(e,n){function o(a,s){try{if(s&&("object"==typeof s||"function"==typeof s)){var i=s.then;if("function"==typeof i)return void i.call(s,function(t){o(a,t)},n)}t[a]=s,0===--r&&e(t)}catch(u){n(u)}}if(0===t.length)return e([]);for(var r=t.length,a=0;a<t.length;a++)o(a,t[a])})},n.resolve=function(t){return t&&"object"==typeof t&&t.constructor===n?t:new n(function(e){e(t)})},n.reject=function(t){return new n(function(e,n){n(t)})},n.race=function(t){return new n(function(e,n){for(var o=0,r=t.length;r>o;o++)t[o].then(e,n)})},n._setImmediateFn=function(t){d=t},"undefined"!=typeof module&&module.exports?module.exports=n:t.Promise||(t.Promise=n)}(this),function(t,e){"use strict";function n(t){return f[p]=o.apply(e,t),p++}function o(t){var n=[].slice.call(arguments,1);return function(){"function"==typeof t?t.apply(e,n):new Function(""+t)()}}function r(t){if(m)setTimeout(o(r,t),0);else{var e=f[t];if(e){m=!0;try{e()}finally{a(t),m=!1}}}}function a(t){delete f[t]}function s(){h=function(){var t=n(arguments);return process.nextTick(o(r,t)),t}}function i(){if(t.postMessage&&!t.importScripts){var e=!0,n=t.onmessage;return t.onmessage=function(){e=!1},t.postMessage("","*"),t.onmessage=n,e}}function u(){var e="setImmediate$"+Math.random()+"$",o=function(n){n.source===t&&"string"==typeof n.data&&0===n.data.indexOf(e)&&r(+n.data.slice(e.length))};t.addEventListener?t.addEventListener("message",o,!1):t.attachEvent("onmessage",o),h=function(){var o=n(arguments);return t.postMessage(e+o,"*"),o}}function c(){var t=new MessageChannel;t.port1.onmessage=function(t){var e=t.data;r(e)},h=function(){var e=n(arguments);return t.port2.postMessage(e),e}}function d(){var t=g.documentElement;h=function(){var e=n(arguments),o=g.createElement("script");return o.onreadystatechange=function(){r(e),o.onreadystatechange=null,t.removeChild(o),o=null},t.appendChild(o),e}}function l(){h=function(){var t=n(arguments);return setTimeout(o(r,t),0),t}}if(!t.setImmediate){var h,p=1,f={},m=!1,g=t.document,v=Object.getPrototypeOf&&Object.getPrototypeOf(t);v=v&&v.setTimeout?v:t,"[object process]"==={}.toString.call(t.process)?s():i()?u():t.MessageChannel?c():g&&"onreadystatechange"in g.createElement("script")?d():l(),v.setImmediate=h,v.clearImmediate=a}}("undefined"==typeof self?"undefined"==typeof global?this:global:self);var AjaxManager=function(){var t=this;if(this.xhr=new XMLHttpRequest,!("withCredentials"in this.xhr))throw"CORS is not supported in this browser. Please use an up-to-date browser, such as Chrome: https://www.google.com/chrome/desktop/index.html";this.xhr.onreadystatechange=function(){switch(t.xhr.readyState){case XMLHttpRequest.UNSENT:t.events.trigger("ajax:queued",t.xhr);break;case XMLHttpRequest.OPENED:t.events.trigger("ajax:opened",t.xhr);break;case XMLHttpRequest.HEADERS_RECEIVED:t.events.trigger("ajax:headers",t.xhr);break;case XMLHttpRequest.LOADING:t.events.trigger("ajax:loading",t.xhr);break;case XMLHttpRequest.DONE:t.events.trigger("ajax:done",t.xhr)}},this.events=new EventManager(["ajax:done","ajax:headers","ajax:loading"]),this.events.addListener("ajax:done",function(t){Number(t.status).between(199,300)&&XHRCache.add(t.url,t.response)})};AjaxManager.prototype.setHeaders=function(t){if(t)for(var e in t)t.hasOwnProperty(e)&&(this.xhr.setRequestHeader(e,t[e]),"accept"==e.toLowerCase()&&this.setContentType(t[e].trim()))},AjaxManager.prototype.formatParams=function(t){if(!t)return"";var e=[];for(var n in t)t.hasOwnProperty(n)&&e.push(""+n+"="+t[n]);return e.join("&")},AjaxManager.prototype.setContentType=function(t){if(t){var e=new RegExp("^text/html","i"),n=new RegExp("^application/json","i");e.test(t)?this.xhr.responseType="document":n.test(t)?this.xhr.responseType="json":this.xhr.responseType="text"}},AjaxManager.prototype.run=function(t,e,n,o){n||(n={}),o||(o={});var r=this;return new Promise(function(a,s){if(r.shouldCache){var i=XHRCache.check(e);i&&a(i)}o["content-type"]="application/x-www-form-urlencoded";var u=r.formatParams(n);r.events.addListener("ajax:done",function(){Number(r.xhr.status).between(199,300)?a(r.xhr):s(r.xhr)}),"get"==t.toLowerCase()?(e=r.setParamsInUrl(e,u),r.xhr.open(t,e,!0),r.setHeaders(o),r.xhr.send(null)):(r.xhr.open(t,e,!0),r.setHeaders(o),r.xhr.send(u))})},AjaxManager.prototype.setParamsInUrl=function(t,e){var n=t.split("?");return n.length>1?""+n[0]+"?"+e+"&"+n[1]:""+n[0]+"?"+e},function(t){var e=function(t){for(;t.firstChild;)t.removeChild(t.firstChild);t.innerHTML=""},n=function(t,e){return t.OnHand||e.OnHand?t.OnHand?e.OnHand?parseInt(t.OnHand)-parseInt(e.OnHand):1:-1:0},o=function(t){var e=document.createElement("div");e.setAttribute("class","data"),this.container=e,this.label=t,this.totalOnHand=0,this.list=[]};o.prototype.setList=function(t){t.sort(function(t,e){var o=-1,r=n(t,e);return r*o});var e=this;this.total=0,t.forEach(function(t){parseInt(t.OnHand)>0&&(e.totalOnHand+=parseInt(t.OnHand)),e.list.length<3&&e.list.push(t)})},o.prototype.toString=function(){return this.toNode().outerHTML},o.prototype.toNode=function(){e(this.container);var t=document.createElement("span"),n=document.createElement("p"),o=document.createElement("span"),r=document.createElement("ul");return t.setAttribute("class","count"),t.innerHTML=""+this.totalOnHand,o.innerHTML=this.label,n.setAttribute("class","source"),n.appendChild(t),n.appendChild(o),this.container.appendChild(n),this.list.forEach(function(t){var e=document.createElement("li"),n=document.createElement("span"),o=document.createElement("span");o.innerHTML=" &mdash; "+t.Facility,n.setAttribute("class","counter available"),n.innerHTML=""+(parseInt(t.OnHand)||"0"),e.appendChild(n),e.appendChild(o),e.setAttribute("title",""+t.ContactName+" | "+t.MainPhone),r.appendChild(e)}),this.list.length>0&&this.container.appendChild(r),this.container},t.DataContainer=o}(window.MaximoSEER=window.MaximoSEER||{});var EventManager=function(t){t.constructor!==Array&&(t=[]);var e={};t.forEach(function(t){e[t]=[]}),this.queues=e};EventManager.prototype.addListener=function(t,e){this.hasOwnProperty("queues")||(this.queues={}),this.queues.hasOwnProperty(t)||(this.queues[t]=[]),-1==this.queues[t].indexOf(e)&&this.queues[t].push(e)},EventManager.prototype.removeListener=function(t,e){this.hasOwnProperty("queues")||(this.queues={}),this.queues.hasOwnProperty(t)||(this.queues[t]=[]);var n=this.queues[t].indexOf(e);-1!=n&&this.queues[t].slice(n,1)},EventManager.prototype.trigger=function(t,e){this.queues||(this.queues={}),this.queues[t]||(this.queues[t]=[]),this.queues[t].forEach(function(t){t(e)})},function(t){var e=function(t){var e=document.createElement("h1"),n=document.createElement("a"),o=document.createElement("span"),r=document.createElement("i");e.setAttribute("class","logo"),o.innerHTML="SEER",r.setAttribute("class","fa fa-circle indicator"),e.appendChild(n),n.appendChild(r),n.appendChild(o),n.setAttribute("target","_blank"),this.container=e,this.icon=r,this.link=n,this.setStatus(t)};e.prototype.setStatus=function(t){this.icon.setAttribute("data-availability",t)},e.prototype.setLink=function(t){this.link.setAttribute("href","http://seer.scientech.com/s/"+t)},e.prototype.toString=function(){return this.container.outerHTML},e.prototype.toNode=function(){return this.container},t.Indicator=e}(window.MaximoSEER=window.MaximoSEER||{}),function(t){window.document.addEventListener("DOMContentLoaded",function(){console.log("Bootstrapping MaxmioSEER toolbar"),t.toolbarInit().then(function(){console.log("Bootstrapped")})})}(window.MaximoSEER=window.MaximoSEER||{});var MessageHandler=function(){this.response={status:!1,message:"",data:{}}};MessageHandler.prototype["default"]=function(t){this.response.status=!1,this.response.message="Unrecognized request type",t(this.response)},MessageHandler.prototype.error=function(t,e){this.response.status=!1,this.response.message=t.toString(),console&&(console.error?console.error(t):console.log&&console.log(t)),e(this.response)},MessageHandler.prototype.login=function(t,e){var n,o,r=new LoginManager,a=this;t||(t={}),t.user&&(n=t.data.user),t.pass&&(o=t.data.pass),r.login(n,o).then(function(t){a.response.status=!0,a.response.message="Logged in successfully",e(a.response)})["catch"](function(t){a.response.status=!1,a.response.message="Error logging in",a.response.data=t,e(a.response)})},MessageHandler.prototype.ajax=function(t,e){t||(t={}),t.data||(t.data={});var n=new AjaxManager,o=this;XHRCache.forceCache&&(n.shouldCache=!0),t.aggressiveCache&&(n.shouldCache=!0),n.run(t.data.method,t.data.url,t.data.params,t.data.headers).then(function(t){o.response.url=t.responseURL;try{o.response.data=JSON.parse(t.responseText),o.response.status=!0,o.response.message="Request complete"}catch(n){console.error("Failure",n),o.response.data=t.responseText,o.response.status=!1,o.response.message="Request failed"}finally{e(o.response)}})["catch"](function(t){console.error("Failure",t),o.response.status=!1,o.response.message="Request failed",o.response.data=t.responseText,o.response.url=t.responseURL})},MessageHandler.prototype.checkLoggedIn=function(t){var e=new AjaxManager,n=this,o=new RegExp("^https?://seer.scientech.com/Account/Login","i");e.run("GET","http://seer.scientech.com/Home/SearchUnique/",{uk:"H1276404"}).then(function(e){o.test(e.responseURL)?(n.response.status=!1,n.response.message="Needs Login"):(n.response.status=!0,n.response.message="Already logged in"),t(n.response)})},MessageHandler.prototype.getSeerInfo=function(t,e){var n,o=new AjaxManager,r=this,a={},s=(new RegExp("^https?://seer.scientech.com/Account/Login","i"),function(t){r.response.status=t.status,r.response.url=t.url,r.response.message=t.message,r.response.data=t.data}),i=function(t){r.response.status=!1,r.response.url=n&&n.responseURL||"",t&&t.toString?r.response.message="Request failed: "+t.toString():r.response.message="Request failed",r.response.data=n&&n.responseText||""};o.run("GET","http://seer.scientech.com/Home/SearchData/",{id:t.inventoryId}).then(function(t){var e={};n=t,e.url=t.responseURL,e.xhr=t;try{e.data=JSON.parse(t.responseText),e.status=!0,e.message="Request complete"}catch(r){console.error("Failure",r),e.data=t.responseText,e.status=!1,e.message="Request failed"}a.searchData=e;var s=e.data;if(s&&s.ParentRecord&&s.ParentRecord.Member_primary_key)return o.run("GET","http://seer.scientech.com/Home/SearchUnique/",{uk:e.data.ParentRecord.Member_primary_key});if(s&&s.OtherParents&&s.OtherParents.length>0&&s.OtherParents[0].Member_primary_key)return o.run("GET","http://seer.scientech.com/Home/SearchUnique/",{uk:e.data.OtherParents[0].Member_primary_key});throw"[object String]"==Object.prototype.toString.call(s)?new Error("Invalid response data"):new Error("No unique id found")}).then(function(t){var e={};n=t,e.url=t.responseURL,e.xhr=t;try{e.data=JSON.parse(t.responseText),e.status=!0,e.message="Request complete"}catch(o){console.error("Failure",o),e.data=t.responseText,e.status=!1,e.message="Request failed"}if(a.searchUnique=e,"[object String]"==Object.prototype.toString.call(e.data))throw new Error("Invalid response data")}).then(function(){var t=a.searchUnique;s(t),e(r.response)})["catch"](function(t){console.error("Failure",t,[a.searchUnique,a.searchData]),a.searchUnique?s(a.searchUnique):a.searchData?a.searchData.status?s(a.searchData):i(a.searchData.message):i(t),e(r.response)})},function(t){var e=function(){};e.prototype.send=function(t,e){return new Promise(function(n,o){var r={requestType:t,data:e},a=function(t){(t.status?n:o)(t)},s=new MessageHandler;switch(r.requestType){case"ajax":s.ajax(r,a);break;case"login":s.login(r.data,a);break;case"checkLoggedIn":s.checkLoggedIn(a);break;default:s["default"](a)}})},e.prototype.sendAjax=function(t){return new Promise(function(e,n){var o={requestType:"ajax",data:t},r=new MessageHandler;r.ajax(o,function(t){(t.status?e:n)(t)})})},e.prototype.sendLogin=function(t){return new Promise(function(t,e){var n={requestType:"login",data:{user:username,pass:pass}},o=new MessageHandler;o.login(n.data,function(n){(n.status?t:e)(n)})})},e.prototype.ensureLoggedIn=function(){return new Promise(function(t,e){var n={requestType:"checkLoggedIn"},o=new MessageHandler;o.checkLoggedIn(n,function(n){(n.status?t:e)(n)})})},e.prototype.getSeerInfo=function(t){var e=new RegExp("^https?://seer.scientech.com/Account/Login","i");return new Promise(function(n,o){var r={requestType:"getSeerInfo",data:{inventoryId:""+t}},a=new MessageHandler;a.ajax(r,function(t){e.test(t.url)?(t.status=!1,t.message="Needs Login",t.data={},delete t.url,o(t)):(delete t.url,(t.status?n:o)(t))})})},t.MessageSender=e}(window.MaximoSEER=window.MaximoSEER||{}),function(t){var e=function(){this.inventoryId=""};e.prototype.getInventoryId=function(){var t=this;return new Promise(function(e,n){var o=function(){t.inventoryId?e(t.inventoryId):n(t.inventoryId)};t.scrape(),o()})},e.prototype.getFromInventoryDetails=function(){var t=document.querySelectorAll('input[type="text"][title^="Item:"]')[0];return t?t.attributes.ov?t.attributes.ov.value:t.value:""},e.prototype.getFromInventoryList=function(){var t=document.querySelectorAll("tr.tcr td.hl")[0];return t?(t.innerText||"").trim():""},e.prototype.getFromPOLine=function(){var t=document.querySelectorAll('tr.tcr input[type="text"][title^="Item:"]')[0];return t?t.attributes.ov?t.attributes.ov.value:t.value:""},e.prototype.getFromPRLine=function(){var t=document.querySelectorAll('tr.tcr input[type="text"][title^="Item:"]')[0];return t?t.attributes.ov?t.attributes.ov.value:t.value:""},e.prototype.scrape=function(){return this.inventoryId="",this.inventoryId||(this.inventoryId=this.getFromPRLine()),this.inventoryId||(this.inventoryId=this.getFromPOLine()),this.inventoryId||(this.inventoryId=this.getFromInventoryList()),this.inventoryId||(this.inventoryId=this.getFromInventoryDetails()),this.inventoryId},t.Scraper=e}(window.MaximoSEER=window.MaximoSEER||{}),function(t){var e=function(t){this.data={},this.list=[],this.totalOnHand=0,t&&this.setData(t)};e.prototype.setData=function(t){var e=null;!e&&t.ParentRecord&&(e=t.ParentRecord),!e&&t.OtherParents&&t.OtherParents.length>0&&(e=t.OtherParents[0]),e&&(this.data=e,this.list=[this.data],this.totalOnHand=parseInt(e.OnHand)||0)},t.SelfContainer=e}(window.MaximoSEER=window.MaximoSEER||{}),Number&&!Number.prototype.between&&(Number.prototype.between=function(t,e){return!!(this>t&&e>this)}),function(t){var e=function(t){for(;t.firstChild;)t.removeChild(t.firstChild);t.innerHTML=""},n=function(t,e){return t.OnHand||e.OnHand?t.OnHand?e.OnHand?parseInt(t.OnHand)-parseInt(e.OnHand):1:-1:0},o=function(t,e){return t.Surplus||e.Surplus?t.Surplus?e.Surplus?parseInt(t.Surplus)-parseInt(e.Surplus):1:-1:0},r=function(t){var e=document.createElement("div");e.setAttribute("class","data"),this.container=e,this.label=t,this.totalOnHand=0,this.totalSurplus=0,this.list=[]};r.prototype.setList=function(t){t.sort(function(t,e){var r=-1,a=o(t,e);return 0===a?n(t,e)*r:a*r});var e=this;this.total=0,t.forEach(function(t){parseInt(t.OnHand)>0&&(e.totalOnHand+=parseInt(t.OnHand)),parseInt(t.Surplus)>0&&(e.totalSurplus+=parseInt(t.Surplus)),e.list.length<3&&e.list.push(t)})},r.prototype.toString=function(){return this.toNode().outerHTML},r.prototype.toNode=function(){e(this.container);var t=document.createElement("span"),n=document.createElement("p"),o=document.createElement("span"),r=document.createElement("ul");return t.setAttribute("class","count"),t.innerHTML=""+this.totalSurplus+" / "+this.totalOnHand,o.innerHTML=this.label,n.setAttribute("class","source"),n.appendChild(t),n.appendChild(o),this.container.appendChild(n),this.list.forEach(function(t){var e=document.createElement("li"),n=document.createElement("span"),o=document.createElement("span"),a=document.createElement("span");a.innerHTML=" &mdash; "+t.Facility,n.setAttribute("class","counter available"),n.innerHTML=" / "+(parseInt(t.OnHand)||"0"),o.setAttribute("class","counter extra"),o.innerHTML=""+(parseInt(t.Surplus)||"0"),e.appendChild(o),e.appendChild(n),e.appendChild(a),e.setAttribute("title",""+t.ContactName+" | "+t.MainPhone),r.appendChild(e)}),this.list.length>0&&this.container.appendChild(r),this.container},t.SurplusDataContainer=r}(window.MaximoSEER=window.MaximoSEER||{}),function(t){t.toolbar={},t.toolbarObj=void 0,t.toolbarEl=void 0,t.toolbar.scanRate=1e3,t.toolbarInit=function(){var e=new t.Scraper,n=new t.MessageSender;return e.getInventoryId().then(function(e){e===t.toolbar.inventoryId?window.setTimeout(t.toolbarInit,t.toolbar.scanRate):(console.debug("Changing id"),t.toolbar.inventoryId=e,n.getSeerInfo(e).then(function(n){console.debug("Got successful API response",n.data),document.getElementById("MaximoSEER-Toolbar")&&document.body.removeChild(document.getElementById("MaximoSEER-Toolbar")),t.toolbarObj=new t.Toolbar(e,n.data),t.toolbarEl=t.toolbarObj.toNode(),document.body.insertBefore(t.toolbarEl,document.body.firstChild),window.setTimeout(t.toolbarInit,t.toolbar.scanRate)},function(){document.getElementById("MaximoSEER-Toolbar")&&document.body.removeChild(document.getElementById("MaximoSEER-Toolbar")),t.toolbarObj=new t.Toolbar,t.toolbarObj.setError('<h1>ERROR: Please <a href="http://seer.scientech.com/" target="_blank">login to SEER</a>, then refresh this page</h1>'),t.toolbarEl=t.toolbarObj.toNode(),document.body.insertBefore(t.toolbarEl,document.body.firstChild),window.setTimeout(t.toolbarInit,t.toolbar.scanRate)})["catch"](function(e){console.debug("Something went wrong with the API call",e),window.setTimeout(t.toolbarInit,t.toolbar.scanRate)}))},function(){console.debug("Could not find inventory id"),window.setTimeout(t.toolbarInit,t.toolbar.scanRate)})["catch"](function(e){console.debug("Something went wrong scraping for the inventory id",e),window.setTimeout(t.toolbarInit,t.toolbar.scanRate)})}}(window.MaximoSEER=window.MaximoSEER||{}),function(t){var e=function(t){for(;t.firstChild;)t.removeChild(t.firstChild);t.innerHTML=""},n=function(e,n){var o=document.createElement("div");o.setAttribute("id","MaximoSEER-Toolbar"),this.container=o,this.indicator=new t.Indicator,this.inventoryId=null,this.data={inventoryId:null,self:null,fleet:null,others:null,pool:null,rapid:null},e&&this.setInventoryId(e),n&&this.setData(n)};n.prototype.setError=function(t){this.errorHTML=t},n.prototype.setData=function(e){this.data.fleet=new t.DataContainer("SNC"),this.data.others=new t.SurplusDataContainer("SEER"),this.data.pool=new t.DataContainer("Vendor"),this.data.rapid=new t.DataContainer("Rapid"),this.data.self=new t.SelfContainer(e),this.data.fleet.setList(e.Fleet||[]),this.data.others.setList(e.Others||[]),this.data.rapid.setList(e.Rapid||[]);var n=[];(e.Pool||[]).forEach(function(t){n.push(t)}),(e.Pooling||[]).forEach(function(t){n.push(t)}),this.data.pool.setList(n),this.data.fleet.list.length>0?this.indicator.setStatus("in-house"):this.data.others.totalOnHand+this.data.pool.totalOnHand+this.data.rapid.totalOnHand>0?this.indicator.setStatus("scarce"):this.indicator.setStatus("nobody")},n.prototype.setStatus=function(t){this.indicator.setStatus(t)},n.prototype.clear=function(){e(this.container);var t=document.createElement("h1");t.setAttribute("class","loading"),t.innerHTML="Loading&hellip;",this.container.appendChild(t)},n.prototype.setInventoryId=function(t){t=parseInt(t),this.data.inventoryId=t,this.indicator.setLink(t);var e=document.createElement("div"),n=document.createElement("p"),o=document.createElement("p");e.setAttribute("class","data meta"),n.innerHTML="Inventory Id:",n.setAttribute("class","source"),o.innerHTML=t,e.appendChild(n),e.appendChild(o),this.inventoryId=e},n.prototype.toString=function(){return this.toNode().outerHTML},n.prototype.toNode=function(){return e(this.container),this.indicator&&this.container.appendChild(this.indicator.toNode()),this.inventoryId&&this.container.appendChild(this.inventoryId),this.data.fleet&&this.container.appendChild(this.data.fleet.toNode()),this.data.others&&this.container.appendChild(this.data.others.toNode()),this.data.rapid&&this.container.appendChild(this.data.rapid.toNode()),this.data.pool&&this.container.appendChild(this.data.pool.toNode()),this.errorHTML&&(e(this.container),this.container.innerHTML=this.errorHTML),this.container},t.Toolbar=n}(window.MaximoSEER=window.MaximoSEER||{});var XHRCache={forceCache:!1,capacity:250,entries:{},count:0,check:function(t){return t in this.entries?(this.entries[t].hits++,this.entries[t].data):null},add:function(t,e){t in this.entries||(this.entries[t]={data:e,timestamp:Date.now(),hits:1},this.count++,this.count>this.capacity&&this.prune())},prune:function(){var t=Date.now(),e=[];for(var n in this.entries){var o=t-this.entries[n].timestamp;if(!(0>=o)){var r={key:n,weight:this.entries[n].hits/o};e.push(r)}}},clear:function(){this.entries={},this.count=0}};
-window.MaximoSEER.toolbarInit().then(function() {
-  console.log('Bootstrapped');
-});
+;(function(global) {
+  /**
+   * Console-polyfill. MIT license.
+   * https://github.com/paulmillr/console-polyfill
+   * Make it safe to do console.log() always.
+   */
+  'use strict';
+  global.console = global.console || {};
+  var con = global.console,
+    prop,
+    method,
+    empty = {},
+    dummy = function() {},
+    properties = ['memory'],
+    methods = ['assert', 'clear', 'count', 'debug', 'dir', 'dirxml', 'error',
+      'exception', 'group', 'groupCollapsed', 'groupEnd', 'info', 'log',
+      'markTimeline', 'profile', 'profiles', 'profileEnd', 'show', 'table',
+      'time', 'timeEnd', 'timeline', 'timelineEnd', 'timeStamp', 'trace',
+      'warn'];
+
+  while (prop = properties.pop())
+    if (!con[prop])
+      con[prop] = empty;
+
+  while (method = methods.pop())
+    if (typeof con[method] !== 'function')
+      con[method] = dummy;
+
+  // Using `this` for web workers & supports Browserify / Webpack.
+})(typeof window === 'undefined' ? this : window);
+
+(function(root) {
+
+  // Store setTimeout reference so promise-polyfill will be unaffected by
+  // other code modifying setTimeout (like sinon.useFakeTimers())
+  var setTimeoutFunc = setTimeout;
+
+  function noop() {}
+
+  // Use polyfill for setImmediate for performance gains
+  var asap = (typeof setImmediate === 'function' && setImmediate) ||
+    function(fn) { setTimeoutFunc(fn, 1); };
+
+  // Polyfill for Function.prototype.bind
+  function bind(fn, thisArg) {
+    return function() {
+      fn.apply(thisArg, arguments);
+    };
+  }
+
+  var isArray = Array.isArray || function(value) { return Object.prototype.toString.call(value) === "[object Array]"; };
+
+  function Promise(fn) {
+    if (typeof this !== 'object') throw new TypeError('Promises must be constructed via new');
+    if (typeof fn !== 'function') throw new TypeError('not a function');
+    this._state = 0;
+    this._value = undefined;
+    this._deferreds = [];
+
+    doResolve(fn, this);
+  }
+
+  function handle(self, deferred) {
+    while (self._state === 3) {
+      self = self._value;
+    }
+    if (self._state === 0) {
+      self._deferreds.push(deferred);
+      return;
+    }
+    asap(function() {
+      var cb = self._state === 1 ? deferred.onFulfilled : deferred.onRejected;
+      if (cb === null) {
+        (self._state === 1 ? resolve : reject)(deferred.promise, self._value);
+        return;
+      }
+      var ret;
+      try {
+        ret = cb(self._value);
+      } catch (e) {
+        reject(deferred.promise, e);
+        return;
+      }
+      resolve(deferred.promise, ret);
+    });
+  }
+
+  function resolve(self, newValue) {
+    try { //Promise Resolution Procedure: https://github.com/promises-aplus/promises-spec#the-promise-resolution-procedure
+      if (newValue === self) throw new TypeError('A promise cannot be resolved with itself.');
+      if (newValue && (typeof newValue === 'object' || typeof newValue === 'function')) {
+        var then = newValue.then;
+        if (newValue instanceof Promise) {
+          self._state = 3;
+          self._value = newValue;
+          finale(self);
+          return;
+        } else if (typeof then === 'function') {
+          doResolve(bind(then, newValue), self);
+          return;
+        }
+      }
+      self._state = 1;
+      self._value = newValue;
+      finale(self);
+    } catch (e) { reject(self, e); }
+  }
+
+  function reject(self, newValue) {
+    self._state = 2;
+    self._value = newValue;
+    finale(self);
+  }
+
+  function finale(self) {
+    for (var i = 0, len = self._deferreds.length; i < len; i++) {
+      handle(self, self._deferreds[i]);
+    }
+    self._deferreds = null;
+  }
+
+  function Handler(onFulfilled, onRejected, promise){
+    this.onFulfilled = typeof onFulfilled === 'function' ? onFulfilled : null;
+    this.onRejected = typeof onRejected === 'function' ? onRejected : null;
+    this.promise = promise;
+  }
+
+  /**
+   * Take a potentially misbehaving resolver function and make sure
+   * onFulfilled and onRejected are only called once.
+   *
+   * Makes no guarantees about asynchrony.
+   */
+  function doResolve(fn, self) {
+    var done = false;
+    try {
+      fn(function (value) {
+        if (done) return;
+        done = true;
+        resolve(self, value);
+      }, function (reason) {
+        if (done) return;
+        done = true;
+        reject(self, reason);
+      });
+    } catch (ex) {
+      if (done) return;
+      done = true;
+      reject(self, ex);
+    }
+  }
+
+  Promise.prototype['catch'] = function (onRejected) {
+    return this.then(null, onRejected);
+  };
+
+  Promise.prototype.then = function(onFulfilled, onRejected) {
+    var prom = new Promise(noop);
+    handle(this, new Handler(onFulfilled, onRejected, prom));
+    return prom;
+  };
+
+  Promise.all = function () {
+    var args = Array.prototype.slice.call(arguments.length === 1 && isArray(arguments[0]) ? arguments[0] : arguments);
+
+    return new Promise(function (resolve, reject) {
+      if (args.length === 0) return resolve([]);
+      var remaining = args.length;
+      function res(i, val) {
+        try {
+          if (val && (typeof val === 'object' || typeof val === 'function')) {
+            var then = val.then;
+            if (typeof then === 'function') {
+              then.call(val, function (val) { res(i, val); }, reject);
+              return;
+            }
+          }
+          args[i] = val;
+          if (--remaining === 0) {
+            resolve(args);
+          }
+        } catch (ex) {
+          reject(ex);
+        }
+      }
+      for (var i = 0; i < args.length; i++) {
+        res(i, args[i]);
+      }
+    });
+  };
+
+  Promise.resolve = function (value) {
+    if (value && typeof value === 'object' && value.constructor === Promise) {
+      return value;
+    }
+
+    return new Promise(function (resolve) {
+      resolve(value);
+    });
+  };
+
+  Promise.reject = function (value) {
+    return new Promise(function (resolve, reject) {
+      reject(value);
+    });
+  };
+
+  Promise.race = function (values) {
+    return new Promise(function (resolve, reject) {
+      for(var i = 0, len = values.length; i < len; i++) {
+        values[i].then(resolve, reject);
+      }
+    });
+  };
+
+  /**
+   * Set the immediate function to execute callbacks
+   * @param fn {function} Function to execute
+   * @private
+   */
+  Promise._setImmediateFn = function _setImmediateFn(fn) {
+    asap = fn;
+  };
+
+  if (typeof module !== 'undefined' && module.exports) {
+    module.exports = Promise;
+  } else if (!root.Promise) {
+    root.Promise = Promise;
+  }
+
+})(this);
+
+(function (global, undefined) {
+  "use strict";
+
+  if (global.setImmediate) {
+    return;
+  }
+
+  var nextHandle = 1; // Spec says greater than zero
+  var tasksByHandle = {};
+  var currentlyRunningATask = false;
+  var doc = global.document;
+  var setImmediate;
+
+  function addFromSetImmediateArguments(args) {
+    tasksByHandle[nextHandle] = partiallyApplied.apply(undefined, args);
+    return nextHandle++;
+  }
+
+  // This function accepts the same arguments as setImmediate, but
+  // returns a function that requires no arguments.
+  function partiallyApplied(handler) {
+    var args = [].slice.call(arguments, 1);
+    return function() {
+      if (typeof handler === "function") {
+        handler.apply(undefined, args);
+      } else {
+        (new Function("" + handler))();
+      }
+    };
+  }
+
+  function runIfPresent(handle) {
+    // From the spec: "Wait until any invocations of this algorithm started before this one have completed."
+    // So if we're currently running a task, we'll need to delay this invocation.
+    if (currentlyRunningATask) {
+      // Delay by doing a setTimeout. setImmediate was tried instead, but in Firefox 7 it generated a
+      // "too much recursion" error.
+      setTimeout(partiallyApplied(runIfPresent, handle), 0);
+    } else {
+      var task = tasksByHandle[handle];
+      if (task) {
+        currentlyRunningATask = true;
+        try {
+          task();
+        } finally {
+          clearImmediate(handle);
+          currentlyRunningATask = false;
+        }
+      }
+    }
+  }
+
+  function clearImmediate(handle) {
+    delete tasksByHandle[handle];
+  }
+
+  function installNextTickImplementation() {
+    setImmediate = function() {
+      var handle = addFromSetImmediateArguments(arguments);
+      process.nextTick(partiallyApplied(runIfPresent, handle));
+      return handle;
+    };
+  }
+
+  function canUsePostMessage() {
+    // The test against `importScripts` prevents this implementation from being installed inside a web worker,
+    // where `global.postMessage` means something completely different and can't be used for this purpose.
+    if (global.postMessage && !global.importScripts) {
+      var postMessageIsAsynchronous = true;
+      var oldOnMessage = global.onmessage;
+      global.onmessage = function() {
+        postMessageIsAsynchronous = false;
+      };
+      global.postMessage("", "*");
+      global.onmessage = oldOnMessage;
+      return postMessageIsAsynchronous;
+    }
+  }
+
+  function installPostMessageImplementation() {
+    // Installs an event handler on `global` for the `message` event: see
+    // * https://developer.mozilla.org/en/DOM/window.postMessage
+    // * http://www.whatwg.org/specs/web-apps/current-work/multipage/comms.html#crossDocumentMessages
+
+    var messagePrefix = "setImmediate$" + Math.random() + "$";
+    var onGlobalMessage = function(event) {
+      if (event.source === global &&
+          typeof event.data === "string" &&
+          event.data.indexOf(messagePrefix) === 0) {
+        runIfPresent(+event.data.slice(messagePrefix.length));
+      }
+    };
+
+    if (global.addEventListener) {
+      global.addEventListener("message", onGlobalMessage, false);
+    } else {
+      global.attachEvent("onmessage", onGlobalMessage);
+    }
+
+    setImmediate = function() {
+      var handle = addFromSetImmediateArguments(arguments);
+      global.postMessage(messagePrefix + handle, "*");
+      return handle;
+    };
+  }
+
+  function installMessageChannelImplementation() {
+    var channel = new MessageChannel();
+    channel.port1.onmessage = function(event) {
+      var handle = event.data;
+      runIfPresent(handle);
+    };
+
+    setImmediate = function() {
+      var handle = addFromSetImmediateArguments(arguments);
+      channel.port2.postMessage(handle);
+      return handle;
+    };
+  }
+
+  function installReadyStateChangeImplementation() {
+    var html = doc.documentElement;
+    setImmediate = function() {
+      var handle = addFromSetImmediateArguments(arguments);
+      // Create a <script> element; its readystatechange event will be fired asynchronously once it is inserted
+      // into the document. Do so, thus queuing up the task. Remember to clean up once it's been called.
+      var script = doc.createElement("script");
+      script.onreadystatechange = function () {
+        runIfPresent(handle);
+        script.onreadystatechange = null;
+        html.removeChild(script);
+        script = null;
+      };
+      html.appendChild(script);
+      return handle;
+    };
+  }
+
+  function installSetTimeoutImplementation() {
+    setImmediate = function() {
+      var handle = addFromSetImmediateArguments(arguments);
+      setTimeout(partiallyApplied(runIfPresent, handle), 0);
+      return handle;
+    };
+  }
+
+  // If supported, we should attach to the prototype of global, since that is where setTimeout et al. live.
+  var attachTo = Object.getPrototypeOf && Object.getPrototypeOf(global);
+  attachTo = attachTo && attachTo.setTimeout ? attachTo : global;
+
+  // Don't get fooled by e.g. browserify environments.
+  if ({}.toString.call(global.process) === "[object process]") {
+    // For Node.js before 0.9
+    installNextTickImplementation();
+
+  } else if (canUsePostMessage()) {
+    // For non-IE10 modern browsers
+    installPostMessageImplementation();
+
+  } else if (global.MessageChannel) {
+    // For web workers, where supported
+    installMessageChannelImplementation();
+
+  } else if (doc && "onreadystatechange" in doc.createElement("script")) {
+    // For IE 6–8
+    installReadyStateChangeImplementation();
+
+  } else {
+    // For older browsers
+    installSetTimeoutImplementation();
+  }
+
+  attachTo.setImmediate = setImmediate;
+  attachTo.clearImmediate = clearImmediate;
+}(typeof self === "undefined" ? typeof global === "undefined" ? this : global : self));
+
+var AjaxManager = function() {
+  var self = this;
+  this.xhr = new XMLHttpRequest();
+  if(!("withCredentials" in this.xhr))
+    throw "CORS is not supported in this browser. Please use an up-to-date browser, such as Chrome: https://www.google.com/chrome/desktop/index.html";
+
+  this.xhr.onreadystatechange = function() {
+    switch(self.xhr.readyState) {
+      case XMLHttpRequest.UNSENT:
+        self.events.trigger('ajax:queued', self.xhr);
+        break;
+      case XMLHttpRequest.OPENED:
+        self.events.trigger('ajax:opened', self.xhr);
+        break;
+      case XMLHttpRequest.HEADERS_RECEIVED:
+        self.events.trigger('ajax:headers', self.xhr);
+        break;
+      case XMLHttpRequest.LOADING:
+        self.events.trigger('ajax:loading', self.xhr);
+        break;
+      case XMLHttpRequest.DONE:
+        self.events.trigger('ajax:done', self.xhr);
+        break;
+    }
+  };
+
+  this.events = new EventManager(['ajax:done', 'ajax:headers', 'ajax:loading']);
+
+  this.events.addListener('ajax:done', function(xhr) {
+    if(Number(xhr.status).between(199, 300)) {
+      // Cache if HTTP 2xx
+      XHRCache.add(xhr.url, xhr.response);
+    }
+  });
+};
+
+// @private
+AjaxManager.prototype.setHeaders = function(headers) {
+  if(!headers) return;
+
+  for(var header in headers) {
+    if(!headers.hasOwnProperty(header)) continue;
+    this.xhr.setRequestHeader(header, headers[header]);
+
+    if(header.toLowerCase() == 'accept') {
+      this.setContentType(headers[header].trim());
+    }
+  }
+};
+
+// transform obj into application/x-www-form-urlencoded
+AjaxManager.prototype.formatParams = function(params) {
+  if(!params) return "";
+
+  var list = [];
+  for(var key in params) {
+    if(!params.hasOwnProperty(key)) continue;
+    list.push('' + key + '=' + params[key] + '');
+  }
+  return list.join('&');
+};
+
+// @private
+AjaxManager.prototype.setContentType = function(contentTypeHeader) {
+  if(!contentTypeHeader) return;
+  var html = new RegExp('^text/html', 'i'),
+    json = new RegExp('^application/json', 'i');
+
+  if(html.test(contentTypeHeader)) {
+    this.xhr.responseType = 'document';
+  }
+  else if(json.test(contentTypeHeader)) {
+    this.xhr.responseType = 'json';
+  }
+  else {
+    this.xhr.responseType = 'text';
+  }
+};
+
+AjaxManager.prototype.run = function(method, url, params, headers) {
+  if(!params) params = {};
+  if(!headers) headers = {};
+  var self = this;
+
+  return new Promise(function(resolve, reject) {
+    if(self.shouldCache) {
+      var cachedResult = XHRCache.check(url);
+      if(cachedResult) {
+        // Cache hit!
+        resolve(cachedResult);
+      }
+    }
+
+    headers["content-type"] = 'application/x-www-form-urlencoded';
+    var paramStr = self.formatParams(params);
+
+    self.events.addListener('ajax:done', function() {
+      if(Number(self.xhr.status).between(199, 300)) {
+        resolve(self.xhr);
+      }
+      else {
+        reject(self.xhr);
+      }
+    });
+
+    if(method.toLowerCase() == 'get') {
+      url = self.setParamsInUrl(url, paramStr);
+      self.xhr.open(method, url, true);
+      self.setHeaders(headers);
+      self.xhr.send(null);
+    }
+    else {
+      self.xhr.open(method, url, true);
+      self.setHeaders(headers);
+      self.xhr.send(paramStr);
+    }
+  });
+};
+
+AjaxManager.prototype.setParamsInUrl = function(url, paramString) {
+  var splitUrl = url.split('?');
+  if(splitUrl.length > 1) {
+    return '' + splitUrl[0] + '?' + paramString + '&' + splitUrl[1];
+  }
+  else {
+    return '' + splitUrl[0] + '?' + paramString;
+  }
+};
+
+;(function(ms) {
+  var clear = function(el) {
+    // remove children so object references aren't destroyed
+    while(el.firstChild) el.removeChild(el.firstChild);
+    // just to be sure...
+    el.innerHTML = '';
+  };
+
+  var sortOnHand = function(a, b) {
+    if(!a.OnHand && !b.OnHand) {
+      return 0;
+    }
+    else if(!a.OnHand) {
+      return -1;
+    }
+    else if(!b.OnHand) {
+      return 1;
+    }
+
+    return parseInt(a.OnHand) - parseInt(b.OnHand);
+  };
+  var sortSurplus = function(a, b) {
+    if(!a.Surplus && !b.Surplus) {
+      return 0;
+    }
+    else if(!a.Surplus) {
+      return -1;
+    }
+    else if(!b.Surplus) {
+      return 1;
+    }
+
+    return parseInt(a.Surplus) - parseInt(b.Surplus);
+  };
+
+  var DataContainer = function(label) {
+    var el = document.createElement('div');
+    el.setAttribute('class', 'data');
+
+    this.container = el;
+    this.label = label;
+    this.totalOnHand = 0;
+    this.list = [];
+  };
+
+  DataContainer.prototype.setList = function(list) {
+    list.sort(function(a, b) {
+      var direction = -1, // greatest to least
+        comparison = sortOnHand(a, b);
+      return comparison * direction;
+    });
+
+    var self = this;
+    this.total = 0;
+    list.forEach(function(obj) {
+      if(parseInt(obj.OnHand) > 0) self.totalOnHand += parseInt(obj.OnHand);
+      if(self.list.length < 3) self.list.push(obj);
+    });
+  };
+
+  DataContainer.prototype.toString = function() {
+    return this.toNode().outerHTML;
+  };
+
+  DataContainer.prototype.toNode = function() {
+    clear(this.container);
+
+    var totalCounter = document.createElement('span'),
+      titleContainer = document.createElement('p'),
+      titleText = document.createElement('span'),
+      listContainer = document.createElement('ul');
+    totalCounter.setAttribute('class', 'count');
+    totalCounter.innerHTML = '' + this.totalOnHand;
+    titleText.innerHTML = this.label;
+
+    titleContainer.setAttribute('class', 'source');
+    titleContainer.appendChild(totalCounter);
+    titleContainer.appendChild(titleText);
+
+    this.container.appendChild(titleContainer);
+
+    this.list.forEach(function(data){
+      var item = document.createElement('li'),
+        counterOnHand = document.createElement('span'),
+        label = document.createElement('span');
+
+      label.innerHTML = ' &mdash; ' + data.Facility;
+      counterOnHand.setAttribute('class', 'counter available');
+      counterOnHand.innerHTML = '' + (parseInt(data.OnHand) || '0');
+
+      item.appendChild(counterOnHand);
+      item.appendChild(label);
+      item.setAttribute('title', '' + data.ContactName + ' | ' + data.MainPhone);
+      listContainer.appendChild(item);
+    });
+
+    if(this.list.length > 0) this.container.appendChild(listContainer);
+    return this.container;
+  };
+
+  ms.DataContainer = DataContainer;
+})(window.MaximoSEER = window.MaximoSEER || {});
+
+var EventManager = function(events) {
+  if(events.constructor !== Array) events = [];
+  var queues = {};
+
+  events.forEach(function(val) {
+    queues[val] = [];
+  });
+  this.queues = queues;
+};
+
+EventManager.prototype.addListener = function(event, callback) {
+  if(!this.hasOwnProperty('queues')) this.queues = {};
+  if(!this.queues.hasOwnProperty(event)) this.queues[event] = [];
+
+  if(this.queues[event].indexOf(callback) == -1) {
+    this.queues[event].push(callback);
+  }
+};
+
+EventManager.prototype.removeListener = function(event, callback) {
+  if(!this.hasOwnProperty('queues')) this.queues = {};
+  if(!this.queues.hasOwnProperty(event)) this.queues[event] = [];
+
+  var index = this.queues[event].indexOf(callback);
+
+  if(index != -1) this.queues[event].slice(index, 1);
+};
+
+EventManager.prototype.trigger = function(event, payload) {
+  if(!this.queues) this.queues = {};
+  if(!this.queues[event]) this.queues[event] = [];
+
+  this.queues[event].forEach(function(callback) {
+    callback(payload);
+  });
+};
+
+;(function(ms) {
+  var Indicator = function(status) {
+    var title = document.createElement('h1'),
+      link = document.createElement('a'),
+      text = document.createElement('span'),
+      icon = document.createElement('i');
+    title.setAttribute('class', 'logo');
+    text.innerHTML = 'SEER';
+    icon.setAttribute('class', 'fa fa-circle indicator');
+    title.appendChild(link);
+    link.appendChild(icon);
+    link.appendChild(text);
+    link.setAttribute('target', '_blank');
+    this.container = title;
+    this.icon = icon;
+    this.link = link;
+    this.setStatus(status);
+  };
+
+  Indicator.prototype.setStatus = function(status) {
+    this.icon.setAttribute('data-availability', status);
+  };
+
+  Indicator.prototype.setLink = function(inventoryId) {
+    this.link.setAttribute('href', 'http://seer.scientech.com/s/' + inventoryId);
+  };
+
+  Indicator.prototype.toString = function() {
+    return this.container.outerHTML;
+  };
+
+  Indicator.prototype.toNode = function() {
+    return this.container;
+  };
+
+  ms.Indicator = Indicator;
+})(window.MaximoSEER = window.MaximoSEER || {});
+
+// default response style:
+//
+// {
+//   "status": true, // success?
+//   "message": "Some message", // Human readable message
+//   "data": {} // Free-form data pass-through
+// }
+var MessageHandler = function() {
+  this.response = {
+    "status": false,
+    "message": "",
+    "data": {}
+  };
+};
+
+MessageHandler.prototype.default = function(callback) {
+  this.response.status = false;
+  this.response.message = "Unrecognized request type";
+
+  callback(this.response);
+};
+
+MessageHandler.prototype.error = function(error, callback) {
+  this.response.status = false;
+  this.response.message = error.toString();
+  if(console) {
+    if(console.error) {
+      console.error(error);
+    }
+    else if(console.log) {
+      console.log(error);
+    }
+  }
+  callback(this.response);
+};
+
+// Expects payload in the following format:
+//
+// {
+//   "user": "some-random-username@example.com",
+//   "pass": "s00p3rs3k3wr"
+// }
+MessageHandler.prototype.login = function(payload, callback) {
+  var username,
+    password,
+    lm = new LoginManager(),
+    self = this;
+
+  if(!payload) payload = {};
+  if(payload.user) username = payload.data.user;
+  if(payload.pass) password = payload.data.pass;
+
+  lm.login(username, password).then(function(xhr) {
+    self.response.status = true;
+    self.response.message = "Logged in successfully";
+    callback(self.response);
+  }).catch(function(xhr) {
+    self.response.status = false;
+    self.response.message = "Error logging in";
+    self.response.data = xhr;
+    callback(self.response);
+  });
+};
+
+// Expects payload in the following format:
+// {
+//   "method": "POST",
+//   "url": "http://www.example.com/foo/bar",
+//   "aggressiveCache": true,
+//   "headers": {}, // [Optional]
+//   "params": {} // [Optional]
+// }
+MessageHandler.prototype.ajax = function(payload, callback) {
+  if(!payload) payload = {};
+  if(!payload.data) payload.data = {};
+
+  var ajax = new AjaxManager(),
+    self = this;
+
+  if(XHRCache.forceCache) ajax.shouldCache = true;
+  if(payload.aggressiveCache) ajax.shouldCache = true;
+
+  ajax.run(payload.data.method, payload.data.url, payload.data.params, payload.data.headers)
+    .then(function(xhr) {
+      self.response.url = xhr.responseURL;
+      try {
+        self.response.data = JSON.parse(xhr.responseText);
+        self.response.status = true;
+        self.response.message = "Request complete";
+      } catch(error) {
+        console.error("Failure", error);
+        self.response.data = xhr.responseText;
+        self.response.status = false;
+        self.response.message = "Request failed";
+      } finally {
+        callback(self.response);
+      }
+    })
+    .catch(function(xhr) {
+      console.error("Failure", xhr);
+      self.response.status = false;
+      self.response.message = "Request failed";
+      self.response.data = xhr.responseText;
+      self.response.url = xhr.responseURL;
+    });
+};
+
+MessageHandler.prototype.checkLoggedIn = function(callback) {
+  var ajax = new AjaxManager(),
+    self = this,
+    isLoginPage = new RegExp('^https?://seer.scientech.com/Account/Login', 'i');
+
+  ajax.run("GET", "http://seer.scientech.com/Home/SearchUnique/", { "uk": "H1276404" }).then(function(xhr) {
+    if(isLoginPage.test(xhr.responseURL)) {
+      self.response.status = false;
+      self.response.message = "Needs Login";
+    }
+    else {
+      self.response.status = true;
+      self.response.message = "Already logged in";
+    }
+    callback(self.response);
+  });
+};
+
+MessageHandler.prototype.getSeerInfo = function(payload, callback) {
+  var ajax = new AjaxManager(),
+    self = this,
+    responses = {},
+    lastXhr,
+    isLoginPage = new RegExp('^https?://seer.scientech.com/Account/Login', 'i'),
+    setData = function(obj) {
+      self.response.status = obj.status;
+      self.response.url = obj.url;
+      self.response.message = obj.message;
+      self.response.data = obj.data;
+    },
+    setError = function(err) {
+      self.response.status = false;
+      self.response.url = (lastXhr && lastXhr.responseURL) || '';
+      if(err && err.toString) {
+        self.response.message = "Request failed: " + err.toString();
+      }
+      else {
+        self.response.message = "Request failed";
+      }
+      self.response.data = (lastXhr && lastXhr.responseText) || '';
+    };
+
+  ajax.run(
+    'GET',
+    'http://seer.scientech.com/Home/SearchData/',
+    { 'id': payload.inventoryId }
+  ).then(function(xhr) {
+    // process 'SearchData'
+    var response = {};
+    lastXhr = xhr;
+    response.url = xhr.responseURL;
+    response.xhr = xhr;
+    try {
+      response.data = JSON.parse(xhr.responseText);
+      response.status = true;
+      response.message = "Request complete";
+    } catch(error) {
+      console.error("Failure", error);
+      response.data = xhr.responseText;
+      response.status = false;
+      response.message = "Request failed";
+    }
+
+    responses.searchData = response;
+    var dt = response.data;
+
+    // call out to 'SearchUnique'
+    if(dt && dt.ParentRecord && dt.ParentRecord.Member_primary_key) {
+      return ajax.run('GET', 'http://seer.scientech.com/Home/SearchUnique/', {
+        'uk': response.data.ParentRecord.Member_primary_key
+      });
+    }
+    else if(dt && dt.OtherParents && dt.OtherParents.length > 0 && dt.OtherParents[0].Member_primary_key) {
+      return ajax.run('GET', 'http://seer.scientech.com/Home/SearchUnique/', {
+        'uk': response.data.OtherParents[0].Member_primary_key
+      });
+    }
+    else if(Object.prototype.toString.call(dt) == '[object String]') {
+      throw new Error('Invalid response data');
+    }
+    else {
+      throw new Error('No unique id found');
+    }
+  }).then(function(xhr) {
+    // process 'SearchUnique'
+    var response = {};
+    lastXhr = xhr;
+
+    response.url = xhr.responseURL;
+    response.xhr = xhr;
+    try {
+      response.data = JSON.parse(xhr.responseText);
+      response.status = true;
+      response.message = "Request complete";
+    } catch(error) {
+      console.error("Failure", error);
+      response.data = xhr.responseText;
+      response.status = false;
+      response.message = "Request failed";
+    }
+
+    responses.searchUnique = response;
+
+    if(Object.prototype.toString.call(response.data) == '[object String]')
+      throw new Error('Invalid response data');
+    return;
+  }).then(function() {
+    // TODO: reconcile differences in data between endpoints
+    //responses.searchData
+    //responses.searchUnique
+    var obj = responses.searchUnique;
+
+    setData(obj);
+
+    callback(self.response);
+  }).catch(function(err) {
+    console.error("Failure", err, [responses.searchUnique, responses.searchData]);
+    if(responses.searchUnique) {
+      // both exist, must be an error in munging
+      setData(responses.searchUnique);
+    }
+    else if(responses.searchData) {
+      // error before SearchUnique
+      if(responses.searchData.status) {
+        setData(responses.searchData);
+      }
+      else {
+        setError(responses.searchData.message);
+      }
+    }
+    else {
+      // error before SearchData
+      // nothing is salvagable
+      setError(err);
+    }
+
+    callback(self.response);
+  });
+};
+
+(function(ms) {
+  var MessageSender = function() {
+  };
+
+  MessageSender.prototype.send = function(type, payload) {
+    return new Promise(function(resolve, reject) {
+      var request = {
+        "requestType": type,
+        "data": payload
+      };
+      var callback = function(response) {
+        (response.status ? resolve : reject)(response);
+      };
+
+      var ms = new MessageHandler();
+      switch(request.requestType) {
+        case 'ajax':
+          ms.ajax(request, callback);
+          break;
+        case 'login':
+          ms.login(request.data, callback);
+          break;
+        case 'checkLoggedIn':
+          ms.checkLoggedIn(callback);
+          break;
+        default:
+          ms.default(callback);
+          break;
+      }
+    });
+  };
+
+  MessageSender.prototype.sendAjax = function(payload) {
+    return new Promise(function(resolve, reject) {
+      var request = {
+        "requestType": "ajax",
+        "data": payload
+      };
+      var ms = new MessageHandler();
+      ms.ajax(request, function(response) {
+        (response.status ? resolve : reject)(response);
+      });
+    });
+  };
+
+  MessageSender.prototype.sendLogin = function(payload) {
+    return new Promise(function(resolve, reject) {
+      var request = {
+        "requestType": "login",
+        "data": {
+          "user": username,
+          "pass": pass
+        }
+      };
+      var ms = new MessageHandler();
+      ms.login(request.data, function(response) {
+        (response.status ? resolve : reject)(response);
+      });
+    });
+  };
+
+  MessageSender.prototype.ensureLoggedIn = function() {
+    return new Promise(function(resolve, reject) {
+      var request = {
+        "requestType": "checkLoggedIn"
+      };
+      var ms = new MessageHandler();
+      ms.checkLoggedIn(request, function(response) {
+        (response.status ? resolve : reject)(response);
+      });
+    });
+  };
+
+  MessageSender.prototype.getSeerInfo = function(inventoryId) {
+    var isLoginPage = new RegExp('^https?://seer.scientech.com/Account/Login', 'i');
+    return new Promise(function(resolve, reject) {
+      var request = {
+        "requestType": "getSeerInfo",
+        "data": {
+          "inventoryId": "" + inventoryId
+        }
+      };
+      var ms = new MessageHandler();
+      ms.ajax(request, function(response) {
+        if(!isLoginPage.test(response.url)) {
+          delete response.url;
+          (response.status ? resolve : reject)(response);
+        }
+        else {
+          response.status = false;
+          response.message = "Needs Login";
+          response.data = {};
+          delete response.url;
+
+          reject(response);
+        }
+      });
+    });
+  };
+
+  ms.MessageSender = MessageSender;
+})(window.MaximoSEER = window.MaximoSEER || {});
+
+(function(ms) {
+  var Scraper = function() {
+    this.inventoryId = '';
+  };
+
+  Scraper.prototype.getInventoryId = function() {
+    var self = this;
+    return new Promise(function(resolve, reject) {
+      ///* STUB: */ resolve('1276404');
+      //resolve('595842');
+      //return;
+      var finish = function() {
+        if(self.inventoryId) {
+          resolve(self.inventoryId);
+        } else {
+          reject(self.inventoryId);
+        }
+      };
+
+      // scrape the page initially since the entire toolbar is re-initialized on
+      // every full page load
+      self.scrape();
+
+      // scrape once, relying on setTimeout() to repeat entire process of
+      // displaying toolbar
+      finish();
+    });
+  };
+
+  Scraper.prototype.getFromInventoryDetails = function() {
+    var element = document.querySelectorAll('input[type="text"][title^="Item:"]')[0];
+    if(element) {
+      if(element.attributes.ov) return element.attributes.ov.value;
+      return element.value;
+    }
+    return '';
+  };
+
+  Scraper.prototype.getFromInventoryList = function() {
+    var element = document.querySelectorAll('tr.tcr td.hl')[0];
+    if(element) {
+      return (element.innerText || '').trim();
+    }
+    return '';
+  };
+
+  Scraper.prototype.getFromPOLine = function() {
+    var element = document.querySelectorAll('tr.tcr input[type="text"][title^="Item:"]')[0];
+    if(element) {
+      if(element.attributes.ov) return element.attributes.ov.value;
+      return element.value;
+    }
+    return '';
+  };
+
+  Scraper.prototype.getFromPRLine = function() {
+    var element = document.querySelectorAll('tr.tcr input[type="text"][title^="Item:"]')[0];
+    if(element) {
+      if(element.attributes.ov) return element.attributes.ov.value;
+      return element.value;
+    }
+    return '';
+  };
+
+  Scraper.prototype.getFromDummyPage = function() {
+    var element = document.querySelectorAll('[data-inventory-id].current')[0];
+    if(element) {
+      return element.dataset.inventoryId;
+    }
+    return '';
+  };
+
+  Scraper.prototype.scrape = function() {
+    this.inventoryId = '';
+    if(!this.inventoryId) this.inventoryId = this.getFromPRLine();
+    if(!this.inventoryId) this.inventoryId = this.getFromPOLine();
+    if(!this.inventoryId) this.inventoryId = this.getFromInventoryList();
+    if(!this.inventoryId) this.inventoryId = this.getFromInventoryDetails();
+    if(!this.inventoryId) this.inventoryId = this.getFromDummyPage();
+    return this.inventoryId;
+  };
+
+  ms.Scraper = Scraper;
+})(window.MaximoSEER = window.MaximoSEER || {});
+
+;(function(ms){
+  var SelfContainer = function(data) {
+    this.data = {};
+    this.list = [];
+    this.totalOnHand = 0;
+
+    if(data)
+      this.setData(data);
+  };
+
+  SelfContainer.prototype.setData = function(data) {
+    var focus = null;
+    if(!focus && data.ParentRecord) {
+      focus = data.ParentRecord;
+    }
+
+    if(!focus && data.OtherParents && data.OtherParents.length > 0) {
+      focus = data.OtherParents[0];
+    }
+
+    if(focus) {
+      this.data = focus;
+      this.list = [this.data];
+      this.totalOnHand = parseInt(focus.OnHand) || 0;
+    }
+  };
+
+  ms.SelfContainer = SelfContainer;
+})(window.MaximoSEER = window.MaximoSEER || {});
+
+if(Number && !Number.prototype.between) {
+  Number.prototype.between = function(start, end) {
+    return !!(this > start && this < end);
+  };
+}
+
+
+;(function(ms) {
+  var clear = function(el) {
+    // remove children so object references aren't destroyed
+    while(el.firstChild) el.removeChild(el.firstChild);
+    // just to be sure...
+    el.innerHTML = '';
+  };
+
+  var sortOnHand = function(a, b) {
+    if(!a.OnHand && !b.OnHand) {
+      return 0;
+    }
+    else if(!a.OnHand) {
+      return -1;
+    }
+    else if(!b.OnHand) {
+      return 1;
+    }
+
+    return parseInt(a.OnHand) - parseInt(b.OnHand);
+  };
+  var sortSurplus = function(a, b) {
+    if(!a.Surplus && !b.Surplus) {
+      return 0;
+    }
+    else if(!a.Surplus) {
+      return -1;
+    }
+    else if(!b.Surplus) {
+      return 1;
+    }
+
+    return parseInt(a.Surplus) - parseInt(b.Surplus);
+  };
+
+  var SurplusDataContainer = function(label) {
+    var el = document.createElement('div');
+    el.setAttribute('class', 'data');
+
+    this.container = el;
+    this.label = label;
+    this.totalOnHand = 0;
+    this.totalSurplus = 0;
+    this.list = [];
+  };
+
+  SurplusDataContainer.prototype.setList = function(list) {
+    list.sort(function(a, b) {
+      var direction = -1, // greatest to least
+        comparison = sortSurplus(a, b);
+      if(comparison === 0) return sortOnHand(a, b) * direction;
+      return comparison * direction;
+    });
+
+    var self = this;
+    this.total = 0;
+    list.forEach(function(obj) {
+      if(parseInt(obj.OnHand) > 0) self.totalOnHand += parseInt(obj.OnHand);
+      if(parseInt(obj.Surplus) > 0) self.totalSurplus += parseInt(obj.Surplus);
+      if(self.list.length < 3) self.list.push(obj);
+    });
+  };
+
+  SurplusDataContainer.prototype.toString = function() {
+    return this.toNode().outerHTML;
+  };
+
+  SurplusDataContainer.prototype.toNode = function() {
+    clear(this.container);
+
+    var totalCounter = document.createElement('span'),
+      titleContainer = document.createElement('p'),
+      titleText = document.createElement('span'),
+      listContainer = document.createElement('ul');
+    totalCounter.setAttribute('class', 'count');
+    totalCounter.innerHTML = '' + this.totalSurplus + ' / ' + this.totalOnHand;
+    titleText.innerHTML = this.label;
+
+    titleContainer.setAttribute('class', 'source');
+    titleContainer.appendChild(totalCounter);
+    titleContainer.appendChild(titleText);
+
+    this.container.appendChild(titleContainer);
+
+    this.list.forEach(function(data){
+      var item = document.createElement('li'),
+        counterOnHand = document.createElement('span'),
+        counterSurplus = document.createElement('span'),
+        label = document.createElement('span');
+
+      label.innerHTML = ' &mdash; ' + data.Facility;
+      counterOnHand.setAttribute('class', 'counter available');
+      counterOnHand.innerHTML = ' / ' + (parseInt(data.OnHand) || '0');
+      counterSurplus.setAttribute('class', 'counter extra');
+      counterSurplus.innerHTML = '' + (parseInt(data.Surplus) || '0');
+
+      item.appendChild(counterSurplus);
+      item.appendChild(counterOnHand);
+      item.appendChild(label);
+      item.setAttribute('title', '' + data.ContactName + ' | ' + data.MainPhone);
+      listContainer.appendChild(item);
+    });
+
+    if(this.list.length > 0) this.container.appendChild(listContainer);
+    return this.container;
+  };
+
+  ms.SurplusDataContainer = SurplusDataContainer;
+})(window.MaximoSEER = window.MaximoSEER || {});
+
+(function(ms) {
+  ms.toolbar = {};
+  ms.toolbarObj = undefined;
+  ms.toolbarEl = undefined;
+  ms.toolbar.scanRate = 1000; // every 1 second
+
+  ms.toolbarInit = function() {
+    var scraper = new ms.Scraper(),
+      sender = new ms.MessageSender();
+
+    return scraper.getInventoryId()
+      .then(function(id) {
+        if(id === ms.toolbar.inventoryId) {
+          // do nothing, remained the same
+          window.setTimeout(ms.toolbarInit, ms.toolbar.scanRate);
+        }
+        else {
+          console.debug('Changing id');
+          ms.toolbar.inventoryId = id;
+          // get data via ajax
+          sender.getSeerInfo(id).then(function(payload) {
+            console.debug('Got successful API response', payload.data);
+            // remove existing toolbar, if exists
+            if(document.getElementById('MaximoSEER-Toolbar')) {
+              document.body.removeChild(document.getElementById('MaximoSEER-Toolbar'));
+            }
+
+            ms.toolbarObj = new ms.Toolbar(id, payload.data);
+            ms.toolbarEl = ms.toolbarObj.toNode();
+
+            document.body.insertBefore(ms.toolbarEl, document.body.firstChild);
+            window.setTimeout(ms.toolbarInit, ms.toolbar.scanRate);
+          }, function() {
+            if(document.getElementById('MaximoSEER-Toolbar')) {
+              document.body.removeChild(document.getElementById('MaximoSEER-Toolbar'));
+            }
+            ms.toolbarObj = new ms.Toolbar();
+            ms.toolbarObj.setError('<h1>ERROR: Please <a href="http://seer.scientech.com/" target="_blank">login to SEER</a>, then refresh this page</h1>');
+            ms.toolbarEl = ms.toolbarObj.toNode();
+
+            document.body.insertBefore(ms.toolbarEl, document.body.firstChild);
+            window.setTimeout(ms.toolbarInit, ms.toolbar.scanRate);
+          }).catch(function(e) {
+            console.debug('Something went wrong with the API call', e);
+            window.setTimeout(ms.toolbarInit, ms.toolbar.scanRate);
+          });
+        }
+      }, function() {
+        // could not find inventory id
+        console.debug('Could not find inventory id');
+        window.setTimeout(ms.toolbarInit, ms.toolbar.scanRate);
+      }).catch(function(err) {
+        console.debug('Something went wrong scraping for the inventory id', err);
+        window.setTimeout(ms.toolbarInit, ms.toolbar.scanRate);
+      });
+  };
+})(window.MaximoSEER = window.MaximoSEER || {});
+
+;(function(ms){
+  var clear = function(el) {
+    // remove children so object references aren't destroyed
+    while(el.firstChild) el.removeChild(el.firstChild);
+    // just to be sure...
+    el.innerHTML = '';
+  };
+
+  var Toolbar = function(inventoryId, data) {
+    var el = document.createElement('div');
+    el.setAttribute('id', 'MaximoSEER-Toolbar');
+
+    this.container = el;
+    this.indicator = new ms.Indicator();
+    this.inventoryId = null;
+    this.data = {
+      inventoryId: null,
+      self: null,
+      fleet: null,
+      others: null,
+      pool: null,
+      rapid: null
+    };
+    if(inventoryId)
+      this.setInventoryId(inventoryId);
+    if(data)
+      this.setData(data);
+  };
+
+  Toolbar.prototype.setError = function(errorHTML) {
+    this.errorHTML = errorHTML;
+  };
+
+  Toolbar.prototype.setData = function(payload) {
+    this.data.fleet = new ms.DataContainer('SNC');
+    this.data.others = new ms.SurplusDataContainer('SEER');
+    this.data.pool = new ms.DataContainer('Vendor');
+    this.data.rapid = new ms.DataContainer('Rapid');
+
+    this.data.self = new ms.SelfContainer(payload);
+
+    this.data.fleet.setList(payload.Fleet || []);
+    this.data.others.setList(payload.Others || []);
+    this.data.rapid.setList(payload.Rapid || []);
+
+    // merge Pool and Pooling
+    var poolData = [];
+    (payload.Pool || []).forEach(function(data) { poolData.push(data); });
+    (payload.Pooling || []).forEach(function(data) { poolData.push(data); });
+    this.data.pool.setList(poolData);
+
+    if(this.data.fleet.list.length > 0) {
+      this.indicator.setStatus('in-house');
+    }
+    else if(this.data.others.totalOnHand + this.data.pool.totalOnHand + this.data.rapid.totalOnHand > 0) {
+      this.indicator.setStatus('scarce');
+    }
+    else {
+      this.indicator.setStatus('nobody');
+    }
+  };
+
+  Toolbar.prototype.setStatus = function(status) {
+    this.indicator.setStatus(status);
+  };
+
+  Toolbar.prototype.clear = function() {
+    clear(this.container);
+
+    // add loading message
+    var loading = document.createElement('h1');
+    loading.setAttribute('class', 'loading');
+    loading.innerHTML = 'Loading&hellip;';
+
+    this.container.appendChild(loading);
+  };
+
+  Toolbar.prototype.setInventoryId = function(id) {
+    id = parseInt(id);
+    this.data.inventoryId = id;
+    this.indicator.setLink(id);
+    var el = document.createElement('div'),
+      title = document.createElement('p'),
+      value = document.createElement('p');
+    el.setAttribute('class', 'data meta');
+    title.innerHTML = 'Inventory Id:';
+    title.setAttribute('class', 'source');
+    value.innerHTML = id;
+
+    el.appendChild(title);
+    el.appendChild(value);
+    this.inventoryId = el;
+  };
+
+  Toolbar.prototype.toString = function() {
+    return this.toNode().outerHTML;
+  };
+
+  Toolbar.prototype.toNode = function() {
+    clear(this.container);
+
+    if(this.indicator)
+      this.container.appendChild(this.indicator.toNode());
+    if(this.inventoryId)
+      this.container.appendChild(this.inventoryId);
+    if(this.data.fleet)
+      this.container.appendChild(this.data.fleet.toNode());
+    if(this.data.others)
+      this.container.appendChild(this.data.others.toNode());
+    if(this.data.rapid)
+      this.container.appendChild(this.data.rapid.toNode());
+    if(this.data.pool)
+      this.container.appendChild(this.data.pool.toNode());
+
+    if(this.errorHTML) {
+      clear(this.container);
+      this.container.innerHTML = this.errorHTML;
+    }
+
+    return this.container;
+  };
+
+  ms.Toolbar = Toolbar;
+})(window.MaximoSEER = window.MaximoSEER || {});
+
+var XHRCache = {
+  forceCache: false,
+  capacity: 250,
+  entries: {},
+  count: 0,
+  check: function(key) {
+    if(key in this.entries) {
+      this.entries[key].hits++;
+      return this.entries[key].data;
+    }
+    return null;
+  },
+  add: function(key, value) {
+    if(key in this.entries) return;
+
+    this.entries[key] = {
+      "data": value,
+      "timestamp": Date.now(),
+      "hits": 1
+    };
+    this.count++;
+
+    if(this.count > this.capacity) this.prune();
+  },
+  prune: function() {
+    var now = Date.now(),
+      bottom = [];
+
+    for(var key in this.entries) {
+      var time = now - this.entries[key].timestamp;
+      if(time <= 0) continue;
+
+      var cacheObj = {
+        "key": key,
+        "weight": this.entries[key].hits / time
+      };
+      bottom.push(cacheObj);
+    }
+  },
+  clear: function() {
+    this.entries = {};
+    this.count = 0;
+  }
+};
+
+(function(ms) {
+  var bootstrap = function() {
+    if(!window.document || !window.document.body) {
+      window.setTimeout(bootstrap, 200); // retry 5x per second until successful
+      return;
+    }
+    console.log('Bootstrapping MaxmioSEER toolbar');
+    ms.toolbarInit().then(function() {
+      console.log('Bootstrapped');
+    });
+  };
+
+  bootstrap();
+})(window.MaximoSEER = window.MaximoSEER || {});
