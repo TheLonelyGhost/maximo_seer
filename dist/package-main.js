@@ -1043,7 +1043,7 @@ MessageHandler.prototype.getSeerInfo = function(payload, callback) {
         }
       };
       var ms = new MessageHandler();
-      ms.ajax(request, function(response) {
+      ms.getSeerInfo(request, function(response) {
         if(!isLoginPage.test(response.url)) {
           delete response.url;
           (response.status ? resolve : reject)(response);
