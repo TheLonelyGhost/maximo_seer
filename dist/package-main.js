@@ -1034,6 +1034,7 @@ MessageHandler.prototype.getSeerInfo = function(payload, callback) {
   };
 
   MessageSender.prototype.getSeerInfo = function(inventoryId) {
+    if(!inventoryId) inventoryId = '595842';
     var isLoginPage = new RegExp('^https?://seer.scientech.com/Account/Login', 'i');
     return new Promise(function(resolve, reject) {
       var request = {
