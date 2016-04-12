@@ -406,134 +406,325 @@
   attachTo.clearImmediate = clearImmediate;
 }(typeof self === "undefined" ? typeof global === "undefined" ? this : global : self));
 
-var AjaxManager = function() {
-  var self = this;
-  this.xhr = new XMLHttpRequest();
-  if(!("withCredentials" in this.xhr))
-    throw "CORS is not supported in this browser. Please use an up-to-date browser, such as Chrome: https://www.google.com/chrome/desktop/index.html";
-
-  this.xhr.onreadystatechange = function() {
-    switch(self.xhr.readyState) {
-      case XMLHttpRequest.UNSENT:
-        self.events.trigger('ajax:queued', self.xhr);
-        break;
-      case XMLHttpRequest.OPENED:
-        self.events.trigger('ajax:opened', self.xhr);
-        break;
-      case XMLHttpRequest.HEADERS_RECEIVED:
-        self.events.trigger('ajax:headers', self.xhr);
-        break;
-      case XMLHttpRequest.LOADING:
-        self.events.trigger('ajax:loading', self.xhr);
-        break;
-      case XMLHttpRequest.DONE:
-        self.events.trigger('ajax:done', self.xhr);
-        break;
-    }
+// default response style:
+//
+// {
+//   "status": true, // success?
+//   "message": "Some message", // Human readable message
+//   "data": {} // Free-form data pass-through
+// }
+var MessageHandler = function() {
+  this.response = {
+    "status": false,
+    "message": "",
+    "data": {}
   };
+};
 
-  this.events = new EventManager(['ajax:done', 'ajax:headers', 'ajax:loading']);
+MessageHandler.prototype.default = function(callback) {
+  this.response.status = false;
+  this.response.message = "Unrecognized request type";
 
-  this.events.addListener('ajax:done', function(xhr) {
-    if(Number(xhr.status).between(199, 300)) {
-      // Cache if HTTP 2xx
-      XHRCache.add(xhr.url, xhr.response);
+  callback(this.response);
+};
+
+MessageHandler.prototype.error = function(error, callback) {
+  this.response.status = false;
+  this.response.message = error.toString();
+  if(console) {
+    if(console.error) {
+      console.error(error);
     }
+    else if(console.log) {
+      console.log(error);
+    }
+  }
+  callback(this.response);
+};
+
+// Expects payload in the following format:
+//
+// {
+//   "user": "some-random-username@example.com",
+//   "pass": "s00p3rs3k3wr"
+// }
+MessageHandler.prototype.login = function(payload, callback) {
+  var username,
+    password,
+    lm = new LoginManager(),
+    self = this;
+
+  if(!payload) payload = {};
+  if(payload.user) username = payload.data.user;
+  if(payload.pass) password = payload.data.pass;
+
+  lm.login(username, password).then(function(xhr) {
+    self.response.status = true;
+    self.response.message = "Logged in successfully";
+    callback(self.response);
+  }).catch(function(xhr) {
+    self.response.status = false;
+    self.response.message = "Error logging in";
+    self.response.data = xhr;
+    callback(self.response);
   });
 };
 
-// @private
-AjaxManager.prototype.setHeaders = function(headers) {
-  if(!headers) return;
+// Expects payload in the following format:
+// {
+//   "method": "POST",
+//   "url": "http://www.example.com/foo/bar",
+//   "aggressiveCache": true,
+//   "headers": {}, // [Optional]
+//   "params": {} // [Optional]
+// }
+MessageHandler.prototype.ajax = function(payload, callback) {
+  if(!payload) payload = {};
+  if(!payload.data) payload.data = {};
 
-  for(var header in headers) {
-    if(!headers.hasOwnProperty(header)) continue;
-    this.xhr.setRequestHeader(header, headers[header]);
+  var ajax = new AjaxManager(),
+    self = this;
 
-    if(header.toLowerCase() == 'accept') {
-      this.setContentType(headers[header].trim());
-    }
-  }
-};
+  if(XHRCache.forceCache) ajax.shouldCache = true;
+  if(payload.aggressiveCache) ajax.shouldCache = true;
 
-// transform obj into application/x-www-form-urlencoded
-AjaxManager.prototype.formatParams = function(params) {
-  if(!params) return "";
-
-  var list = [];
-  for(var key in params) {
-    if(!params.hasOwnProperty(key)) continue;
-    list.push('' + key + '=' + params[key] + '');
-  }
-  return list.join('&');
-};
-
-// @private
-AjaxManager.prototype.setContentType = function(contentTypeHeader) {
-  if(!contentTypeHeader) return;
-  var html = new RegExp('^text/html', 'i'),
-    json = new RegExp('^application/json', 'i');
-
-  if(html.test(contentTypeHeader)) {
-    this.xhr.responseType = 'document';
-  }
-  else if(json.test(contentTypeHeader)) {
-    this.xhr.responseType = 'json';
-  }
-  else {
-    this.xhr.responseType = 'text';
-  }
-};
-
-AjaxManager.prototype.run = function(method, url, params, headers) {
-  if(!params) params = {};
-  if(!headers) headers = {};
-  var self = this;
-
-  return new Promise(function(resolve, reject) {
-    if(self.shouldCache) {
-      var cachedResult = XHRCache.check(url);
-      if(cachedResult) {
-        // Cache hit!
-        resolve(cachedResult);
+  ajax.run(payload.data.method, payload.data.url, payload.data.params, payload.data.headers)
+    .then(function(xhr) {
+      self.response.url = xhr.responseURL;
+      try {
+        self.response.data = JSON.parse(xhr.responseText);
+        self.response.status = true;
+        self.response.message = "Request complete";
+      } catch(error) {
+        console.error("Failure", error);
+        self.response.data = xhr.responseText;
+        self.response.status = false;
+        self.response.message = "Request failed";
+      } finally {
+        callback(self.response);
       }
-    }
-
-    headers["content-type"] = 'application/x-www-form-urlencoded';
-    var paramStr = self.formatParams(params);
-
-    self.events.addListener('ajax:done', function() {
-      if(Number(self.xhr.status).between(199, 300)) {
-        resolve(self.xhr);
-      }
-      else {
-        reject(self.xhr);
-      }
+    })
+    .catch(function(xhr) {
+      console.error("Failure", xhr);
+      self.response.status = false;
+      self.response.message = "Request failed";
+      self.response.data = xhr.responseText;
+      self.response.url = xhr.responseURL;
     });
+};
 
-    if(method.toLowerCase() == 'get') {
-      url = self.setParamsInUrl(url, paramStr);
-      self.xhr.open(method, url, true);
-      self.setHeaders(headers);
-      self.xhr.send(null);
+MessageHandler.prototype.checkLoggedIn = function(callback) {
+  var ajax = new AjaxManager(),
+    self = this,
+    isLoginPage = new RegExp('^https?://seer.scientech.com/Account/Login', 'i');
+
+  ajax.run("GET", "http://seer.scientech.com/Home/SearchUnique/", { "uk": "H1276404" }).then(function(responseData) {
+    if(!responseData) {
+      self.response.status = false;
+      self.response.message = "Needs Login";
     }
     else {
-      self.xhr.open(method, url, true);
-      self.setHeaders(headers);
-      self.xhr.send(paramStr);
+      self.response.status = true;
+      self.response.message = "Already logged in";
     }
+    callback(self.response);
   });
 };
 
-AjaxManager.prototype.setParamsInUrl = function(url, paramString) {
-  var splitUrl = url.split('?');
-  if(splitUrl.length > 1) {
-    return '' + splitUrl[0] + '?' + paramString + '&' + splitUrl[1];
+MessageHandler.prototype.getSeerInfo = function(payload, callback) {
+  var ajax = new AjaxManager(),
+    self = this,
+    responses = {},
+    setData = function(obj) {
+      self.response.status = obj.status;
+      self.response.url = '';
+      self.response.message = obj.message;
+      self.response.data = obj.data;
+    },
+    setError = function(err) {
+      self.response.status = false;
+      self.response.url = '';
+      if(err && err.toString) {
+        self.response.message = "Request failed: " + err.toString();
+      }
+      else {
+        self.response.message = "Request failed";
+      }
+      self.response.data = '';
+    };
+
+  ajax.run(
+    'GET',
+    'http://seer.scientech.com/Home/SearchData/',
+    { 'id': payload.inventoryId }
+  ).then(function(responseData) {
+    // process 'SearchData'
+    var response = {};
+    response.headers = responseData.headers;
+    try {
+      response.data = JSON.parse(responseData.data);
+      response.status = true;
+      response.message = "Request complete";
+    } catch(error) {
+      console.error("Failure", error);
+      response.data = responseData;
+      response.status = false;
+      response.message = "Request failed";
+    }
+
+    responses.searchData = response;
+    var dt = response.data;
+
+    // call out to 'SearchUnique'
+    if(dt && dt.ParentRecord && dt.ParentRecord.Member_primary_key) {
+      return ajax.run('GET', 'http://seer.scientech.com/Home/SearchUnique/', {
+        'uk': response.data.ParentRecord.Member_primary_key
+      });
+    }
+    else if(dt && dt.OtherParents && dt.OtherParents.length > 0 && dt.OtherParents[0].Member_primary_key) {
+      return ajax.run('GET', 'http://seer.scientech.com/Home/SearchUnique/', {
+        'uk': response.data.OtherParents[0].Member_primary_key
+      });
+    }
+    else if(Object.prototype.toString.call(dt) == '[object String]') {
+      throw new Error('Invalid response data');
+    }
+    else {
+      throw new Error('No unique id found');
+    }
+  }).then(function(responseData) {
+    // process 'SearchUnique'
+    var response = {};
+    response.headers = responseData.headers;
+    try {
+      response.data = JSON.parse(responseData.data);
+      response.status = true;
+      response.message = "Request complete";
+    } catch(error) {
+      console.error("Failure", error);
+      response.data = responseData;
+      response.status = false;
+      response.message = "Request failed";
+    }
+
+    responses.searchUnique = response;
+
+    if(Object.prototype.toString.call(response.data) == '[object String]')
+      throw new Error('Invalid response data');
+    return;
+  }).then(function() {
+    // TODO: reconcile differences in data between endpoints
+    //responses.searchData
+    //responses.searchUnique
+    var obj = responses.searchUnique;
+
+    setData(obj);
+
+    callback(self.response);
+  })['catch'](function(err) {
+    console.error("Failure", err, [responses.searchUnique, responses.searchData]);
+    if(responses.searchUnique) {
+      // both exist, must be an error in munging
+      setData(responses.searchUnique);
+    }
+    else if(responses.searchData) {
+      // error before SearchUnique
+      if(responses.searchData.status) {
+        setData(responses.searchData);
+      }
+      else {
+        setError(responses.searchData.message);
+      }
+    }
+    else {
+      // error before SearchData
+      // nothing is salvagable
+      setError(err);
+    }
+
+    callback(self.response);
+  });
+};
+
+;(function(ms) {
+  if(window.inJsBHO && window.inJsBHOAPI) {
+    var AjaxManager = function() {
+      var self = this;
+    };
+
+    AjaxManager.prototype.formatParams = function(params) {
+      if(!params) return "";
+
+      var list = [];
+      for(var key in params) {
+        if(!params.hasOwnProperty(key)) continue;
+        list.push('' + key + '=' + params[key] + '');
+      }
+      return list.join('&');
+    };
+
+    AjaxManager.prototype.run = function(method, url, params, headers) {
+      method = 'GET';
+      if(!params) params = {};
+      if(!headers) headers = {};
+      var self = this;
+
+      return new Promise(function(resolve, reject) {
+        if(self.shouldCache) {
+          var cachedResult = XHRCache.check(url);
+          if(cachedResult) {
+            // Cache hit!
+            resolve(cachedResult);
+          }
+        }
+
+        //headers["content-type"] = 'application/x-www-form-urlencoded';
+        var paramStr = self.formatParams(params);
+
+        var checkComplete = function() {
+          if(!window.inJsBHOAPI.reqResponseHeaders) {
+            window.setTimeout(checkComplete, 100); // retry every 100 ms
+            return;
+          }
+
+          var response = {
+            data: window.inJsBHOAPI.reqResponse,
+            headers: JSON.parse(JSON.stringify(window.inJsBHOAPI.reqResponseHeaders))
+          };
+
+          if(!window.inJsBHOAPI.reqResponse) {
+            // empty string means it's not a JSON response (e.g., a login page)
+            reject(response);
+          }
+          else {
+            resolve(response);
+          }
+        };
+
+        var urlStr = self.setParamsInUrl(url, paramStr);
+
+        window.inJsBHO.getRequest(urlStr);
+        checkComplete();
+      });
+    };
+
+    AjaxManager.prototype.setParamsInUrl = function(url, paramString) {
+      var splitUrl = url.split('?');
+      if(splitUrl.length > 1) {
+        return '' + splitUrl[0] + '?' + paramString + '&' + splitUrl[1];
+      }
+      else {
+        return '' + splitUrl[0] + '?' + paramString;
+      }
+    };
+
+    window.MaximoSEER.AjaxManager = AjaxManager;
+    window.AjaxManager = AjaxManager;
   }
   else {
-    return '' + splitUrl[0] + '?' + paramString;
+    (window.console && (window.console.error || window.console.log) || window.alert)("Unable to find IE-specific interface necessary for the SEER toolbar to function correctly.");
   }
-};
+})(window.MaximoSEER = window.MaximoSEER || {});
 
 ;(function(ms) {
   var clear = function(el) {
@@ -713,253 +904,6 @@ EventManager.prototype.trigger = function(event, payload) {
   ms.Indicator = Indicator;
 })(window.MaximoSEER = window.MaximoSEER || {});
 
-// default response style:
-//
-// {
-//   "status": true, // success?
-//   "message": "Some message", // Human readable message
-//   "data": {} // Free-form data pass-through
-// }
-var MessageHandler = function() {
-  this.response = {
-    "status": false,
-    "message": "",
-    "data": {}
-  };
-};
-
-MessageHandler.prototype.default = function(callback) {
-  this.response.status = false;
-  this.response.message = "Unrecognized request type";
-
-  callback(this.response);
-};
-
-MessageHandler.prototype.error = function(error, callback) {
-  this.response.status = false;
-  this.response.message = error.toString();
-  if(console) {
-    if(console.error) {
-      console.error(error);
-    }
-    else if(console.log) {
-      console.log(error);
-    }
-  }
-  callback(this.response);
-};
-
-// Expects payload in the following format:
-//
-// {
-//   "user": "some-random-username@example.com",
-//   "pass": "s00p3rs3k3wr"
-// }
-MessageHandler.prototype.login = function(payload, callback) {
-  var username,
-    password,
-    lm = new LoginManager(),
-    self = this;
-
-  if(!payload) payload = {};
-  if(payload.user) username = payload.data.user;
-  if(payload.pass) password = payload.data.pass;
-
-  lm.login(username, password).then(function(xhr) {
-    self.response.status = true;
-    self.response.message = "Logged in successfully";
-    callback(self.response);
-  }).catch(function(xhr) {
-    self.response.status = false;
-    self.response.message = "Error logging in";
-    self.response.data = xhr;
-    callback(self.response);
-  });
-};
-
-// Expects payload in the following format:
-// {
-//   "method": "POST",
-//   "url": "http://www.example.com/foo/bar",
-//   "aggressiveCache": true,
-//   "headers": {}, // [Optional]
-//   "params": {} // [Optional]
-// }
-MessageHandler.prototype.ajax = function(payload, callback) {
-  if(!payload) payload = {};
-  if(!payload.data) payload.data = {};
-
-  var ajax = new AjaxManager(),
-    self = this;
-
-  if(XHRCache.forceCache) ajax.shouldCache = true;
-  if(payload.aggressiveCache) ajax.shouldCache = true;
-
-  ajax.run(payload.data.method, payload.data.url, payload.data.params, payload.data.headers)
-    .then(function(xhr) {
-      self.response.url = xhr.responseURL;
-      try {
-        self.response.data = JSON.parse(xhr.responseText);
-        self.response.status = true;
-        self.response.message = "Request complete";
-      } catch(error) {
-        console.error("Failure", error);
-        self.response.data = xhr.responseText;
-        self.response.status = false;
-        self.response.message = "Request failed";
-      } finally {
-        callback(self.response);
-      }
-    })
-    .catch(function(xhr) {
-      console.error("Failure", xhr);
-      self.response.status = false;
-      self.response.message = "Request failed";
-      self.response.data = xhr.responseText;
-      self.response.url = xhr.responseURL;
-    });
-};
-
-MessageHandler.prototype.checkLoggedIn = function(callback) {
-  var ajax = new AjaxManager(),
-    self = this,
-    isLoginPage = new RegExp('^https?://seer.scientech.com/Account/Login', 'i');
-
-  ajax.run("GET", "http://seer.scientech.com/Home/SearchUnique/", { "uk": "H1276404" }).then(function(xhr) {
-    if(isLoginPage.test(xhr.responseURL)) {
-      self.response.status = false;
-      self.response.message = "Needs Login";
-    }
-    else {
-      self.response.status = true;
-      self.response.message = "Already logged in";
-    }
-    callback(self.response);
-  });
-};
-
-MessageHandler.prototype.getSeerInfo = function(payload, callback) {
-  var ajax = new AjaxManager(),
-    self = this,
-    responses = {},
-    lastXhr,
-    isLoginPage = new RegExp('^https?://seer.scientech.com/Account/Login', 'i'),
-    setData = function(obj) {
-      self.response.status = obj.status;
-      self.response.url = obj.url;
-      self.response.message = obj.message;
-      self.response.data = obj.data;
-    },
-    setError = function(err) {
-      self.response.status = false;
-      self.response.url = (lastXhr && lastXhr.responseURL) || '';
-      if(err && err.toString) {
-        self.response.message = "Request failed: " + err.toString();
-      }
-      else {
-        self.response.message = "Request failed";
-      }
-      self.response.data = (lastXhr && lastXhr.responseText) || '';
-    };
-
-  ajax.run(
-    'GET',
-    'http://seer.scientech.com/Home/SearchData/',
-    { 'id': payload.inventoryId }
-  ).then(function(xhr) {
-    // process 'SearchData'
-    var response = {};
-    lastXhr = xhr;
-    response.url = xhr.responseURL;
-    response.xhr = xhr;
-    try {
-      response.data = JSON.parse(xhr.responseText);
-      response.status = true;
-      response.message = "Request complete";
-    } catch(error) {
-      console.error("Failure", error);
-      response.data = xhr.responseText;
-      response.status = false;
-      response.message = "Request failed";
-    }
-
-    responses.searchData = response;
-    var dt = response.data;
-
-    // call out to 'SearchUnique'
-    if(dt && dt.ParentRecord && dt.ParentRecord.Member_primary_key) {
-      return ajax.run('GET', 'http://seer.scientech.com/Home/SearchUnique/', {
-        'uk': response.data.ParentRecord.Member_primary_key
-      });
-    }
-    else if(dt && dt.OtherParents && dt.OtherParents.length > 0 && dt.OtherParents[0].Member_primary_key) {
-      return ajax.run('GET', 'http://seer.scientech.com/Home/SearchUnique/', {
-        'uk': response.data.OtherParents[0].Member_primary_key
-      });
-    }
-    else if(Object.prototype.toString.call(dt) == '[object String]') {
-      throw new Error('Invalid response data');
-    }
-    else {
-      throw new Error('No unique id found');
-    }
-  }).then(function(xhr) {
-    // process 'SearchUnique'
-    var response = {};
-    lastXhr = xhr;
-
-    response.url = xhr.responseURL;
-    response.xhr = xhr;
-    try {
-      response.data = JSON.parse(xhr.responseText);
-      response.status = true;
-      response.message = "Request complete";
-    } catch(error) {
-      console.error("Failure", error);
-      response.data = xhr.responseText;
-      response.status = false;
-      response.message = "Request failed";
-    }
-
-    responses.searchUnique = response;
-
-    if(Object.prototype.toString.call(response.data) == '[object String]')
-      throw new Error('Invalid response data');
-    return;
-  }).then(function() {
-    // TODO: reconcile differences in data between endpoints
-    //responses.searchData
-    //responses.searchUnique
-    var obj = responses.searchUnique;
-
-    setData(obj);
-
-    callback(self.response);
-  }).catch(function(err) {
-    console.error("Failure", err, [responses.searchUnique, responses.searchData]);
-    if(responses.searchUnique) {
-      // both exist, must be an error in munging
-      setData(responses.searchUnique);
-    }
-    else if(responses.searchData) {
-      // error before SearchUnique
-      if(responses.searchData.status) {
-        setData(responses.searchData);
-      }
-      else {
-        setError(responses.searchData.message);
-      }
-    }
-    else {
-      // error before SearchData
-      // nothing is salvagable
-      setError(err);
-    }
-
-    callback(self.response);
-  });
-};
-
 (function(ms) {
   var MessageSender = function() {
   };
@@ -1034,7 +978,6 @@ MessageHandler.prototype.getSeerInfo = function(payload, callback) {
   };
 
   MessageSender.prototype.getSeerInfo = function(inventoryId) {
-    var isLoginPage = new RegExp('^https?://seer.scientech.com/Account/Login', 'i');
     return new Promise(function(resolve, reject) {
       var request = {
         "requestType": "getSeerInfo",
@@ -1044,15 +987,12 @@ MessageHandler.prototype.getSeerInfo = function(payload, callback) {
       };
       var ms = new MessageHandler();
       ms.getSeerInfo(request.data, function(response) {
-        if(!isLoginPage.test(response.url)) {
-          delete response.url;
-          (response.status ? resolve : reject)(response);
+        if(response.status) {
+          resolve(response);
         }
         else {
           response.status = false;
-          response.message = "Needs Login";
           response.data = {};
-          delete response.url;
 
           reject(response);
         }
