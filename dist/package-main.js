@@ -647,83 +647,78 @@ MessageHandler.prototype.getSeerInfo = function(payload, callback) {
 };
 
 ;(function(ms) {
-  if(window.inJsBHO && window.inJsBHOAPI) {
-    var AjaxManager = function() {
-      var self = this;
-    };
+  var AjaxManager = function() {
+    var self = this;
+  };
 
-    AjaxManager.prototype.formatParams = function(params) {
-      if(!params) return "";
+  AjaxManager.prototype.formatParams = function(params) {
+    if(!params) return "";
 
-      var list = [];
-      for(var key in params) {
-        if(!params.hasOwnProperty(key)) continue;
-        list.push('' + key + '=' + params[key] + '');
+    var list = [];
+    for(var key in params) {
+      if(!params.hasOwnProperty(key)) continue;
+      list.push('' + key + '=' + params[key] + '');
+    }
+    return list.join('&');
+  };
+
+  AjaxManager.prototype.run = function(method, url, params, headers) {
+    method = 'GET';
+    if(!params) params = {};
+    if(!headers) headers = {};
+    var self = this;
+
+    return new Promise(function(resolve, reject) {
+      if(self.shouldCache) {
+        var cachedResult = XHRCache.check(url);
+        if(cachedResult) {
+          // Cache hit!
+          resolve(cachedResult);
+        }
       }
-      return list.join('&');
-    };
 
-    AjaxManager.prototype.run = function(method, url, params, headers) {
-      method = 'GET';
-      if(!params) params = {};
-      if(!headers) headers = {};
-      var self = this;
+      //headers["content-type"] = 'application/x-www-form-urlencoded';
+      var paramStr = self.formatParams(params);
 
-      return new Promise(function(resolve, reject) {
-        if(self.shouldCache) {
-          var cachedResult = XHRCache.check(url);
-          if(cachedResult) {
-            // Cache hit!
-            resolve(cachedResult);
-          }
+      var checkComplete = function() {
+        if(!window.inJsBHOAPI.reqResponseHeaders) {
+          window.setTimeout(checkComplete, 100); // retry every 100 ms
+          return;
         }
 
-        //headers["content-type"] = 'application/x-www-form-urlencoded';
-        var paramStr = self.formatParams(params);
-
-        var checkComplete = function() {
-          if(!window.inJsBHOAPI.reqResponseHeaders) {
-            window.setTimeout(checkComplete, 100); // retry every 100 ms
-            return;
-          }
-
-          var response = {
-            data: window.inJsBHOAPI.reqResponse,
-            headers: JSON.parse(JSON.stringify(window.inJsBHOAPI.reqResponseHeaders))
-          };
-
-          if(!window.inJsBHOAPI.reqResponse) {
-            // empty string means it's not a JSON response (e.g., a login page)
-            reject(response);
-          }
-          else {
-            resolve(response);
-          }
+        var response = {
+          data: window.inJsBHOAPI.reqResponse,
+          headers: JSON.parse(JSON.stringify(window.inJsBHOAPI.reqResponseHeaders))
         };
 
-        var urlStr = self.setParamsInUrl(url, paramStr);
+        if(!window.inJsBHOAPI.reqResponse) {
+          // empty string means it's not a JSON response (e.g., a login page)
+          reject(response);
+        }
+        else {
+          resolve(response);
+        }
+      };
 
-        window.inJsBHO.getRequest(urlStr);
-        checkComplete();
-      });
-    };
+      var urlStr = self.setParamsInUrl(url, paramStr);
 
-    AjaxManager.prototype.setParamsInUrl = function(url, paramString) {
-      var splitUrl = url.split('?');
-      if(splitUrl.length > 1) {
-        return '' + splitUrl[0] + '?' + paramString + '&' + splitUrl[1];
-      }
-      else {
-        return '' + splitUrl[0] + '?' + paramString;
-      }
-    };
+      window.inJsBHO.getRequest(urlStr);
+      checkComplete();
+    });
+  };
 
-    window.MaximoSEER.AjaxManager = AjaxManager;
-    window.AjaxManager = AjaxManager;
-  }
-  else {
-    (window.console && (window.console.error || window.console.log) || window.alert)("Unable to find IE-specific interface necessary for the SEER toolbar to function correctly.");
-  }
+  AjaxManager.prototype.setParamsInUrl = function(url, paramString) {
+    var splitUrl = url.split('?');
+    if(splitUrl.length > 1) {
+      return '' + splitUrl[0] + '?' + paramString + '&' + splitUrl[1];
+    }
+    else {
+      return '' + splitUrl[0] + '?' + paramString;
+    }
+  };
+
+  window.MaximoSEER.AjaxManager = AjaxManager;
+  window.AjaxManager = AjaxManager;
 })(window.MaximoSEER = window.MaximoSEER || {});
 
 ;(function(ms) {
