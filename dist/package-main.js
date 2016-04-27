@@ -869,7 +869,8 @@ EventManager.prototype.trigger = function(event, payload) {
       icon = document.createElement('i');
     title.setAttribute('class', 'logo');
     text.innerHTML = 'SEER';
-    icon.setAttribute('class', 'fa fa-circle indicator');
+    icon.setAttribute('class', 'indicator');
+    icon.innerHTML = '&#9679;';
     title.appendChild(link);
     link.appendChild(icon);
     link.appendChild(text);
@@ -1261,6 +1262,8 @@ if(Number && !Number.prototype.between) {
             ms.toolbarEl = ms.toolbarObj.toNode();
 
             document.body.insertBefore(ms.toolbarEl, document.body.firstChild);
+            // trigger resize window event so Maximo reflows document
+            ms.triggerWindowResize();
             window.setTimeout(ms.toolbarInit, ms.toolbar.scanRate);
           }, function() {
             if(document.getElementById('MaximoSEER-Toolbar')) {
@@ -1285,6 +1288,17 @@ if(Number && !Number.prototype.between) {
         console.debug('Something went wrong scraping for the inventory id', err);
         window.setTimeout(ms.toolbarInit, ms.toolbar.scanRate);
       });
+  };
+
+  ms.triggerWindowResize = function() {
+    try {
+      var evt = window.document.createEvent('UIEvents');
+      evt.initUIEvent('resize', true, false, window, 0);
+      window.dispatchEvent(evt);
+    }
+    catch(e) {
+      window.dispatchEvent(new Event('resize'));
+    }
   };
 })(window.MaximoSEER = window.MaximoSEER || {});
 
