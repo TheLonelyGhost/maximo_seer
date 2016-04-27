@@ -562,6 +562,7 @@ MessageHandler.prototype.getSeerInfo = function(payload, callback) {
     var response = {};
     response.headers = responseData.headers;
     try {
+      console.log("response data", responseData.data);
       response.data = JSON.parse(responseData.data);
       response.status = true;
       response.message = "Request complete";
