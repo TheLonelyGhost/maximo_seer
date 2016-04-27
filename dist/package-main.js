@@ -562,7 +562,6 @@ MessageHandler.prototype.getSeerInfo = function(payload, callback) {
     var response = {};
     response.headers = responseData.headers;
     try {
-      console.log("search data response", responseData.data);
       response.data = JSON.parse(responseData.data);
       response.status = true;
       response.message = "Request complete";
@@ -598,7 +597,6 @@ MessageHandler.prototype.getSeerInfo = function(payload, callback) {
     var response = {};
     response.headers = responseData.headers;
     try {
-      console.log("search unique response", responseData.data);
       response.data = JSON.parse(responseData.data);
       response.status = true;
       response.message = "Request complete";
@@ -1272,7 +1270,7 @@ if(Number && !Number.prototype.between) {
               document.body.removeChild(document.getElementById('MaximoSEER-Toolbar'));
             }
             ms.toolbarObj = new ms.Toolbar();
-            ms.toolbarObj.setError('<h1>ERROR: Please <a href="http://seer.scientech.com/" target="_blank">login to SEER</a>, then refresh this page</h1>');
+            ms.toolbarObj.setError('<h1 class="error-text">ERROR: Please <a href="http://seer.scientech.com/" target="_blank">login to SEER</a>, then refresh this page</h1>');
             ms.toolbarEl = ms.toolbarObj.toNode();
 
             document.body.insertBefore(ms.toolbarEl, document.body.firstChild);
