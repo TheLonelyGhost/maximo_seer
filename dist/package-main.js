@@ -562,7 +562,7 @@ MessageHandler.prototype.getSeerInfo = function(payload, callback) {
     var response = {};
     response.headers = responseData.headers;
     try {
-      console.log("response data", responseData.data);
+      console.log("search data response", responseData.data);
       response.data = JSON.parse(responseData.data);
       response.status = true;
       response.message = "Request complete";
@@ -598,6 +598,7 @@ MessageHandler.prototype.getSeerInfo = function(payload, callback) {
     var response = {};
     response.headers = responseData.headers;
     try {
+      console.log("search unique response", responseData.data);
       response.data = JSON.parse(responseData.data);
       response.status = true;
       response.message = "Request complete";
