@@ -696,7 +696,13 @@ MessageHandler.prototype.getSeerInfo = function(payload, callback) {
           reject(response);
         }
         else {
-          resolve(response);
+          try {
+            JSON.parse(window.inJsBHOAPI.reqResponse);
+            resolve(response);
+          }
+          catch(e) {
+            reject(e);
+          }
         }
       };
 
