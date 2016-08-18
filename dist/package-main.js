@@ -1247,6 +1247,37 @@ if(Number && !Number.prototype.between) {
     var scraper = new ms.Scraper(),
       sender = new ms.MessageSender();
 
+    var ieMeta = document.createElement('meta');
+    ieMeta.httpEquiv = "X-UA-Compatible";
+    ieMeta.content = "IE=edge";
+
+    var ieMetaSetter = function() {
+      try {
+        var titleTag = document.getElementsByTagName('title')[0];
+        if(titleTag.nextSibling) {
+          titleTag.parentNode.appendChild(ieMeta, titleTag.nextSibling);
+        }
+        else {
+          titleTag.parentNode.appendChild(ieMeta);
+        }
+        if(console && console.log) console.log("inserted meta tag for IE=edge");
+      } catch(e) {
+        if(console && console.error) console.error(e);
+        window.setTimeout(ieMetaSetter, 100);
+      }
+    };
+
+    var ieMetaExists = function() {
+      var metaTags = document.getElementsByTagName('meta');
+      for(var i = 0; i < metaTags.length; i++) {
+        if(metaTags[i].content == "IE=edge") return true;
+      }
+
+      return false;
+    };
+    if(!ieMetaExists()) ieMetaSetter();
+
+
     return scraper.getInventoryId()
       .then(function(id) {
         if(id === ms.toolbar.inventoryId) {
