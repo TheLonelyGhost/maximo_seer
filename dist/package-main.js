@@ -421,7 +421,7 @@ var MessageHandler = function() {
   };
 };
 
-MessageHandler.prototype.default = function(callback) {
+MessageHandler.prototype.defaultAction = function(callback) {
   this.response.status = false;
   this.response.message = "Unrecognized request type";
 
@@ -462,7 +462,7 @@ MessageHandler.prototype.login = function(payload, callback) {
     self.response.status = true;
     self.response.message = "Logged in successfully";
     callback(self.response);
-  }).catch(function(xhr) {
+  })['catch'](function(xhr) {
     self.response.status = false;
     self.response.message = "Error logging in";
     self.response.data = xhr;
@@ -504,7 +504,7 @@ MessageHandler.prototype.ajax = function(payload, callback) {
         callback(self.response);
       }
     })
-    .catch(function(xhr) {
+    ['catch'](function(xhr) {
       console.error("Failure", xhr);
       self.response.status = false;
       self.response.message = "Request failed";
@@ -926,7 +926,7 @@ EventManager.prototype.trigger = function(event, payload) {
           ms.checkLoggedIn(callback);
           break;
         default:
-          ms.default(callback);
+          ms.defaultAction(callback);
           break;
       }
     });
@@ -1275,7 +1275,7 @@ if(Number && !Number.prototype.between) {
 
             document.body.insertBefore(ms.toolbarEl, document.body.firstChild);
             window.setTimeout(ms.toolbarInit, ms.toolbar.scanRate);
-          }).catch(function(e) {
+          })['catch'](function(e) {
             console.debug('Something went wrong with the API call', e);
             window.setTimeout(ms.toolbarInit, ms.toolbar.scanRate);
           });
@@ -1284,7 +1284,7 @@ if(Number && !Number.prototype.between) {
         // could not find inventory id
         console.debug('Could not find inventory id');
         window.setTimeout(ms.toolbarInit, ms.toolbar.scanRate);
-      }).catch(function(err) {
+      })['catch'](function(err) {
         console.debug('Something went wrong scraping for the inventory id', err);
         window.setTimeout(ms.toolbarInit, ms.toolbar.scanRate);
       });
