@@ -3,9 +3,17 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <title>Maximo seer by TheLonelyGhost</title>
+    <title>Maximo SEER by TheLonelyGhost</title>
 
-    <script type="text/javascript">if(!/^localhost$/i.test(window.location.hostname)) document.write('<base href="https://thelonelyghost.github.io/maximo_seer/" />');</script>
+      <script type="text/javascript">
+        (function() {
+          if(!/^(localhost|127\.\d+\.\d+\.\d+$/i.test(window.location.hostname)) {
+            let base = document.createElement('base');
+            base.setAttribute('href', 'https://thelonelyghost.github.io/maximo_seer/');
+            document.head.appendChild(base);
+          }
+        })();
+      </script>
 
     <link rel="stylesheet" href="stylesheets/styles.css">
     <link rel="stylesheet" href="stylesheets/github-light.css">
